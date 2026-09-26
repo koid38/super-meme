@@ -328,9 +328,9 @@
   <section class="rules" aria-labelledby="rulesTitle">
     <h2 class="section-title" id="rulesTitle">Как играть</h2>
     <ul>
-      <li><span id="icoPiece"></span><span>Меняй местами соседние изразцы и собирай <b>3 в ряд</b>. Цель — набрать нужные достопримечательности, пока не кончились ходы.</span></li>
+      <li><span id="icoPiece"></span><span>Меняй местами соседние изразцы и собирай <b>3 в ряд</b>. Цель — набрать нужные достопримечательности, симиты и кошек, пока не кончились ходы.</span></li>
       <li><span id="icoGull"></span><span><b>4 в ряд</b> — чайка. Пролетает над строкой или столбцом и снимает всё на пути.</span></li>
-      <li><span id="icoCat"></span><span><b>Уголок</b> (буквы Г или Т) — стамбульская кошка. Прыгает и снимает квадрат 3×3.</span></li>
+      <li><span id="icoFerry"></span><span><b>Уголок</b> (буквы Г или Т) — паром. Даёт гудок и снимает квадрат 3×3.</span></li>
       <li><span id="icoNazar"></span><span><b>5 в ряд</b> — назар. Поменяй его с любым изразцом, и уйдут все такого же цвета. Два назара очищают всё поле.</span></li>
       <li><span id="icoDust"></span><span><b>Пыльные клетки</b> — старые изразцы. Собери совпадение прямо на них, чтобы отреставрировать. Тёмные чистятся дважды.</span></li>
     </ul>
@@ -345,13 +345,14 @@
 // the tuning script runs the same code headless.
 function createEngine(opts) {
   const N = (opts && opts.size) || 8;
-  const TYPES = (opts && opts.types) || 6;
+  const KINDS = (opts && opts.kinds) || [0, 1, 2, 3, 4, 5];
   const rng = (opts && opts.rng) || Math.random;
   let grid = [], dust = [], nextId = 1;
 
   const key = (r, c) => r * N + c;
   const inside = (r, c) => r >= 0 && r < N && c >= 0 && c < N;
   const rnd = n => Math.floor(rng() * n);
+  const randomKind = () => KINDS[rnd(KINDS.length)];
   const newTile = (type, special) => ({ id: nextId++, type, special: special || null });
 
   function findRuns(g) {
@@ -408,9 +409,9 @@ function createEngine(opts) {
   }
 
   function mostCommonType() {
-    const count = new Array(TYPES).fill(0);
-    for (const row of grid) for (const t of row) if (t && t.type >= 0) count[t.type]++;
-    return count.indexOf(Math.max(...count));
+    const count = {};
+    for (const row of grid) for (const t of row) if (t && t.type >= 0) count[t.type] = (count[t.type] || 0) + 1;
+    return Number(Object.keys(count).reduce((a, b) => (count[b] > count[a] ? b : a)));
   }
 
   // Fire every special caught in the clear set; the set grows as effects chain.
@@ -458,7 +459,7 @@ function createEngine(opts) {
       }
       const gap = w + 1;
       for (let r = w; r >= 0; r--) {
-        const t = newTile(rnd(TYPES));
+        const t = newTile(randomKind());
         grid[r][c] = t;
         spawns.push({ id: t.id, type: t.type, special: null, r, c, from: r - gap });
       }
@@ -538,7 +539,7 @@ function createEngine(opts) {
     const tiles = [];
     for (const row of grid) for (const t of row) if (t.special !== 'nazar') tiles.push(t);
     for (let tries = 0; tries < 500; tries++) {
-      for (const t of tiles) t.type = rnd(TYPES);
+      for (const t of tiles) t.type = randomKind();
       if (!findRuns(grid).length && findMove()) break;
     }
     return tiles.map(t => ({ id: t.id, type: t.type, special: t.special }));
@@ -580,7 +581,7 @@ function createEngine(opts) {
         grid.push([]);
         for (let c = 0; c < N; c++) {
           let type;
-          do { type = rnd(TYPES); } while (
+          do { type = randomKind(); } while (
             (c >= 2 && grid[r][c - 1].type === type && grid[r][c - 2].type === type) ||
             (r >= 2 && grid[r - 1][c].type === type && grid[r - 2][c].type === type));
           grid[r].push(newTile(type));
@@ -632,7 +633,7 @@ function createEngine(opts) {
   }
 
   return {
-    N, TYPES, init, swap, findMove, allMoves, bestMove, rate, dustLeft, snapshot, restore,
+    N, KINDS, init, swap, findMove, allMoves, bestMove, rate, dustLeft, snapshot, restore,
     get grid() { return grid; },
     get dust() { return dust; },
   };
@@ -642,17 +643,25 @@ function createEngine(opts) {
 // ==LEVELS==
 // Targets tuned by simulating a few hundred games per level with a greedy bot.
 const LEVELS = [
-  { name: 'Султанахмет', caption: 'Айя-София и Голубая мечеть смотрят друг на друга через площадь.', moves: 20, goals: { 0: 17, 1: 17 } },
-  { name: 'Галата', caption: 'Генуэзская башня 1348 года и красный трамвай с Истикляля.', moves: 20, goals: { 2: 19, 5: 19 } },
-  { name: 'Ускюдар', caption: 'Девичья башня стоит на островке у азиатского берега. Под пылью — старые изразцы.', moves: 22, goals: { 3: 24 },
+  { name: 'Султанахмет', caption: 'Айя-София и Голубая мечеть смотрят друг на друга через площадь, а между ними — лотки с симитами.', moves: 20,
+    pieces: [0, 1, 2, 5, 6, 7], goals: { 0: 17, 1: 17 } },
+  { name: 'Галата', caption: 'Генуэзская башня 1348 года, а на её ступенях дремлют местные кошки.', moves: 20,
+    pieces: [0, 2, 3, 5, 6, 7], goals: { 2: 19, 7: 19 } },
+  { name: 'Ускюдар', caption: 'Девичья башня стоит на островке у азиатского берега. Под пылью — старые изразцы.', moves: 22,
+    pieces: [1, 3, 4, 5, 6, 7], goals: { 3: 24 },
     dust: ['........', '........', '..1111..', '..1111..', '..1111..', '........', '........', '........'] },
-  { name: 'Ортакёй', caption: 'Мост над Босфором соединяет Европу и Азию.', moves: 22, goals: { 4: 25, 3: 20 } },
-  { name: 'Эминёню', caption: 'Паромы, Египетский базар и вид сразу на все холмы.', moves: 24, goals: { 0: 23, 2: 23, 5: 23 } },
-  { name: 'Бешикташ', caption: 'Изразцы у дворца Долмабахче ждут реставрации. Тёмные клетки чистятся дважды.', moves: 24, goals: {},
+  { name: 'Ортакёй', caption: 'Мост над Босфором и симит с лотка на набережной — лучший завтрак в городе.', moves: 22,
+    pieces: [0, 1, 3, 4, 6, 7], goals: { 4: 25, 6: 20 } },
+  { name: 'Эминёню', caption: 'Паромы, горячие симиты и Египетский базар.', moves: 24,
+    pieces: [0, 2, 4, 5, 6, 7], goals: { 6: 23, 2: 23, 5: 23 } },
+  { name: 'Бешикташ', caption: 'Изразцы у дворца Долмабахче ждут реставрации. Тёмные клетки чистятся дважды.', moves: 24,
+    pieces: [0, 1, 2, 3, 4, 7], goals: {},
     dust: ['........', '.111111.', '.1....1.', '.1.22.1.', '.1.22.1.', '.1....1.', '.111111.', '........'] },
-  { name: 'Балат', caption: 'Разноцветные дома у Золотого Рога и пыльные дворики.', moves: 24, goals: { 3: 25, 4: 25 },
+  { name: 'Балат', caption: 'Разноцветные дома у Золотого Рога, пыльные дворики и их хозяева — кошки.', moves: 24,
+    pieces: [1, 3, 4, 5, 6, 7], goals: { 7: 25, 3: 25 },
     dust: ['........', '........', '..1111..', '.122221.', '.122221.', '..1111..', '........', '........'] },
-  { name: 'Весь Стамбул', caption: 'Финал маршрута: все достопримечательности сразу.', moves: 26, goals: { 0: 20, 1: 20, 2: 20, 3: 20, 4: 20, 5: 20 },
+  { name: 'Весь Стамбул', caption: 'Финал маршрута: все достопримечательности сразу.', moves: 26,
+    pieces: [0, 1, 2, 3, 4, 5], goals: { 0: 20, 1: 20, 2: 20, 3: 20, 4: 20, 5: 20 },
     dust: ['........', '........', '........', '11111111', '11111111', '........', '........', '........'] },
 ];
 const DUST_PATTERNS = [
@@ -668,15 +677,16 @@ function levelDef(n) {
   const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
   const loop = n - LEVELS.length;
   const kinds = 2 + (n % 2);
-  const pool = [0, 1, 2, 3, 4, 5];
+  const pool = [0, 1, 2, 3, 4, 5, 6, 7];
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
   const dust = n % 3 === 0 ? DUST_PATTERNS[Math.floor(rand() * DUST_PATTERNS.length)] : null;
   const count = (kinds === 2 ? 23 : 20) + Math.min(Math.floor(loop / 2), 4) - (dust ? (kinds === 2 ? 3 : 6) : 0);
   const goals = {};
-  pool.slice(0, kinds).forEach(t => { goals[t] = count; });
+  const pieces = pool.slice(0, 6);
+  pieces.slice(0, kinds).forEach(t => { goals[t] = count; });
   const lap = Math.ceil(loop / DISTRICTS.length);
   const name = DISTRICTS[(loop - 1) % DISTRICTS.length] + (lap > 1 ? ' · круг ' + lap : '');
-  return { name, caption: 'Маршрут продолжается по новым кварталам, цели растут.', moves: dust ? 25 : 24, goals, dust };
+  return { name, caption: 'Маршрут продолжается по новым кварталам, цели растут.', moves: dust ? 25 : 24, pieces, goals, dust };
 }
 // ==/LEVELS==
 
@@ -696,6 +706,23 @@ function levelDef(n) {
   const progress = Object.assign({ unlocked: 1, stars: {}, best: {} }, store.get('izrazcy-progress', {}));
 
   // ---------- Artwork ----------
+  // Sesame ring: a braided dough loop with seeds, drawn once.
+  const SIMIT_ART = (() => {
+    let twists = '', seeds = '';
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * Math.PI * 2;
+      twists += `M${(50 + 17 * Math.cos(a)).toFixed(1)} ${(52 + 17 * Math.sin(a)).toFixed(1)} L${(50 + 31 * Math.cos(a + 0.35)).toFixed(1)} ${(52 + 31 * Math.sin(a + 0.35)).toFixed(1)} `;
+    }
+    for (let i = 0; i < 22; i++) {
+      const a = i / 22 * Math.PI * 2 + 0.13, r = i % 2 ? 20.5 : 27.5;
+      const x = (50 + r * Math.cos(a)).toFixed(1), y = (52 + r * Math.sin(a)).toFixed(1);
+      seeds += `<ellipse cx="${x}" cy="${y}" rx="1.7" ry="1" transform="rotate(${(a * 180 / Math.PI + 90).toFixed(0)} ${x} ${y})"/>`;
+    }
+    return `<circle cx="50" cy="52" r="24" fill="none" stroke="#f6d08c" stroke-width="15"/>
+      <path d="${twists}" stroke="#c98a45" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <g fill="#fffaf0">${seeds}</g>`;
+  })();
+
   const PIECES = [
     { name: 'Айя-София', color: '#a64fc2', art: c => `
       <g fill="#fff">
@@ -779,6 +806,17 @@ function levelDef(n) {
         <rect x="19" y="54" width="62" height="3"/>
         <circle cx="33" cy="70" r="1.8"/><circle cx="67" cy="70" r="1.8"/>
       </g>` },
+    { name: 'Симит', color: '#8f5a2e', art: () => SIMIT_ART },
+    { name: 'Кошка', color: '#5d6d86', art: c => `
+      <g fill="#fff">
+        <path d="M27 46 L29 19 L47 33 Z"/><path d="M73 46 L71 19 L53 33 Z"/>
+        <ellipse cx="50" cy="51" rx="26" ry="22"/>
+      </g>
+      <path d="M31.5 38 L32.8 26.5 L41 33 Z M68.5 38 L67.2 26.5 L59 33 Z" fill="#f5b3c4"/>
+      <g fill="${c}"><ellipse cx="40.5" cy="48" rx="3.3" ry="4.8"/><ellipse cx="59.5" cy="48" rx="3.3" ry="4.8"/></g>
+      <path d="M46.5 56 H53.5 L50 60Z" fill="#e97897"/>
+      <path d="M50 60 Q46 65 42 62 M50 60 Q54 65 58 62" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M23 53 H11 M24 58.5 L12.5 62.5 M77 53 H89 M76 58.5 L87.5 62.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>` },
   ];
 
   const GULL = '<path d="M4 14 Q8.5 7.5 13 13.5 Q17.5 7.5 22 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>';
@@ -791,12 +829,12 @@ function levelDef(n) {
       <g transform="translate(66 8)"><circle cx="13" cy="13" r="13" fill="#16233f"/>${GULL}</g>`,
     bomb: `<circle cx="50" cy="50" r="46" fill="none" stroke="#f0b429" stroke-width="4"/>
       <circle cx="50" cy="50" r="40" fill="none" stroke="#f0b429" stroke-width="1.6"/>
-      <g transform="translate(60 59)" stroke="#16233f" stroke-width="1.8" stroke-linejoin="round">
-        <path d="M5 12 L6 1 L14 7 Z M29 12 L28 1 L20 7 Z" fill="#f08a24"/>
-        <circle cx="17" cy="17" r="12.5" fill="#f08a24"/>
-        <circle cx="12.5" cy="16" r="1.9" fill="#16233f" stroke="none"/><circle cx="21.5" cy="16" r="1.9" fill="#16233f" stroke="none"/>
-        <path d="M15.5 20.5 L18.5 20.5 L17 22.3Z" fill="#16233f" stroke="none"/>
-        <path d="M8 21 H3 M8 23.5 L3.5 25.5 M26 21 H31 M26 23.5 L30.5 25.5" stroke-width="1.2" fill="none"/>
+      <g transform="translate(61 62)">
+        <circle cx="15" cy="15" r="15" fill="#16233f"/>
+        <rect x="16" y="5.5" width="4" height="6" fill="#d6453a"/><rect x="16" y="5.5" width="4" height="1.8" fill="#0d1428"/>
+        <rect x="8.5" y="11" width="14" height="6" rx="1" fill="#fff"/>
+        <path d="M4 17 H26 L23 23 H7 Z" fill="#fff"/>
+        <path d="M5 26 q2.5 -2 5 0 t5 0 t5 0 t5 0" fill="none" stroke="#7cc8ff" stroke-width="1.4" stroke-linecap="round"/>
       </g>`,
   };
   const NAZAR = `<svg viewBox="0 0 100 100" aria-hidden="true">
@@ -837,9 +875,9 @@ function levelDef(n) {
   const LOCK = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" style="vertical-align:-1px;margin-right:4px"><rect x="3" y="7" width="10" height="8" rx="2" fill="currentColor"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
   const STAR = on => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2l-5.9 3.2 1.3-6.5L2.5 9.3l6.6-.8z" fill="${on ? '#f0b429' : '#dfe5ef'}" stroke="${on ? '#c98b0c' : '#c9d1df'}" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 
-  $('icoPiece').innerHTML = pieceSVG(2, null);
+  $('icoPiece').innerHTML = pieceSVG(7, null);
   $('icoGull').innerHTML = pieceSVG(5, 'row');
-  $('icoCat').innerHTML = pieceSVG(3, 'bomb');
+  $('icoFerry').innerHTML = pieceSVG(6, 'bomb');
   $('icoNazar').innerHTML = NAZAR;
   $('icoDust').innerHTML = cellIcon('dust2');
 
@@ -905,7 +943,7 @@ function levelDef(n) {
       match(cascade) { const n = note(Math.min(cascade + 1, 11)); tone(n, 0.24, { type: 'triangle', gain: 0.2 }); tone(n * 2, 0.16, { gain: 0.05 }); },
       special() { [4, 6, 9].forEach((i, k) => tone(note(i), 0.14, { type: 'triangle', gain: 0.13, at: k * 0.06 })); },
       gull() { noise(0.35, { gain: 0.09, from: 700, to: 3200 }); tone(1500, 0.18, { gain: 0.035, to: 1100, at: 0.05 }); },
-      bomb() { tone(160, 0.22, { gain: 0.28, to: 55 }); noise(0.2, { gain: 0.05, from: 300, to: 200, q: 0.7 }); },
+      bomb() { tone(110, 0.38, { type: 'triangle', gain: 0.24 }); tone(146.8, 0.34, { type: 'sawtooth', gain: 0.035 }); noise(0.2, { gain: 0.04, from: 300, to: 200, q: 0.7 }); },
       nazar() { [7, 9, 11, 12, 14].forEach((i, k) => tone(note(i), 0.2, { gain: 0.08, at: k * 0.05 })); },
       clink() { tone(1760, 0.09, { gain: 0.05 }); tone(2637, 0.07, { gain: 0.03, at: 0.02 }); },
       goal() { tone(note(7), 0.14, { type: 'triangle', gain: 0.14 }); tone(note(11), 0.24, { type: 'triangle', gain: 0.14, at: 0.1 }); },
@@ -1332,7 +1370,7 @@ function levelDef(n) {
   function startLevel(n, snap) {
     level = n;
     def = levelDef(n);
-    engine = createEngine();
+    engine = createEngine({ kinds: def.pieces });
     engine.init(def.dust);
     need = { ...def.goals };
     movesLeft = def.moves;
