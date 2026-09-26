@@ -74,9 +74,10 @@
     padding: 10px 12px; display: grid; gap: 7px; box-shadow: 0 4px 14px rgba(22,35,63,.06);
   }
   .level-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .lvl { margin: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; font-weight: 400; }
-  .lvl .serif { font-size: 20px; line-height: 1.1; color: var(--ink); }
-  .eyebrow { font-size: 13px; font-weight: 800; color: var(--turq); white-space: nowrap; }
+  .lvl { margin: 0; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 15px; font-weight: 800; line-height: 1.2; }
+  .lvl-name { color: var(--ink); }
+  .lvl-name::before { content: '·'; margin-right: 6px; color: var(--muted); }
+  .eyebrow { font-size: inherit; font-weight: 800; color: var(--turq); white-space: nowrap; }
   .caption {
     margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; cursor: pointer;
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
@@ -342,7 +343,7 @@
 
   <section class="level">
     <div class="level-top">
-      <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="serif" id="lvlName">Султанахмет</span></h2>
+      <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="lvl-name" id="lvlName">Султанахмет</span></h2>
       <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
     </div>
     <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
