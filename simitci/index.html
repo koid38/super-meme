@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Симитчи</title>
+<meta name="description" content="Кликер про стамбульского торговца симитами: продавай, нанимай помощников, открывай районы.">
+<meta name="theme-color" content="#eaf1fa">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='%23c98a45' stroke-width='22'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&family=Yeseva+One&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --sky: #e3ecf8;
+    --bg: #f1f5fa;
+    --surface: #ffffff;
+    --ink: #16233f;
+    --muted: #5a6784;
+    --line: #d8e0ec;
+    --cobalt: #2350b8;
+    --cobalt-deep: #173a8a;
+    --turq: #129aa3;
+    --cart: #d6453a;
+    --crust: #c98a45;
+    --gold: #f0b429;
+    --ok: #2f9e5b;
+  }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--sky) 0, var(--bg) 320px) var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .serif { font-family: "Yeseva One", Georgia, "Times New Roman", serif; font-weight: 400; }
+  button { font: inherit; color: inherit; }
+  .app {
+    max-width: 540px; margin: 0 auto; display: grid; gap: 12px;
+    padding-inline: 16px;
+    padding-block: calc(env(safe-area-inset-top, 0px) + 12px) calc(env(safe-area-inset-bottom, 0px) + 32px);
+  }
+  .app > * { min-width: 0; }
+
+  /* ---------- Header ---------- */
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { width: 34px; height: 34px; flex: none; }
+  h1 { margin: 0; font-size: 22px; line-height: 1.05; color: var(--cobalt-deep); }
+  .toggles { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--cobalt);
+  }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .icon-btn[aria-pressed="false"] { color: #9aa6bd; background: #f4f6fa; }
+  .icon-btn[aria-pressed="false"] .on, .icon-btn[aria-pressed="true"] .off { display: none; }
+  .icon-btn:focus-visible, .btn:focus-visible, .buy:focus-visible, .tab:focus-visible, .cart-btn:focus-visible, .mode button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  /* ---------- Balance ---------- */
+  .bank { display: grid; justify-items: center; gap: 2px; text-align: center; }
+  .bank .amount { display: flex; align-items: center; gap: 8px; font-size: clamp(30px, 9vw, 40px); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .coin { display: inline-grid; place-items: center; width: 1em; height: 1em; border-radius: 50%; background: var(--gold); color: #5a3d00; font-size: .62em; flex: none; }
+  .bank .rate { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .bank .rate b { color: var(--ink); }
+  .buff { color: var(--ok); font-weight: 700; }
+
+  /* ---------- Scene ---------- */
+  .scene {
+    position: relative; overflow: hidden; border-radius: 18px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #dcebfb 0%, #eef5fd 58%, #cfe2f6 58%, #bcd6f0 100%);
+    aspect-ratio: 16 / 11; max-width: 100%;
+    touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  }
+  .scene .skyline { position: absolute; left: 0; right: 0; top: 30%; width: 100%; height: 28%; }
+  .scene .waves { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 42%; }
+  .cart-btn {
+    position: absolute; left: 50%; bottom: 4%; width: 58%; transform: translateX(-50%);
+    padding: 0; border: 0; background: none; cursor: pointer; transition: transform .08s;
+  }
+  .cart-btn svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 6px rgba(22,35,63,.25)); }
+  .cart-btn.press { transform: translateX(-50%) scale(.95); }
+  .district-tag {
+    position: absolute; left: 12px; top: 10px; padding: 3px 10px; border-radius: 999px;
+    background: rgba(255,255,255,.85); font-size: 13px; font-weight: 700; color: var(--cobalt-deep);
+  }
+  .plus {
+    position: absolute; pointer-events: none; font-weight: 700; font-size: 18px; color: var(--cobalt-deep);
+    text-shadow: 0 1px 0 #fff, 0 0 6px #fff; animation: plus .9s ease-out forwards; white-space: nowrap;
+  }
+  @keyframes plus { from { opacity: 1; transform: translate(-50%, -50%); } to { opacity: 0; transform: translate(-50%, -160%); } }
+  .crumb { position: absolute; width: 18px; height: 18px; pointer-events: none; animation: crumb .8s ease-in forwards; }
+  @keyframes crumb { to { transform: translate(var(--dx), 120px) rotate(200deg); opacity: 0; } }
+  .gull {
+    position: absolute; top: 8%; left: 0; width: 64px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+    animation: gull 9s linear forwards;
+  }
+  .gull svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 0 8px rgba(240,180,41,.9)); }
+  @keyframes gull {
+    0% { transform: translate(-80px, 0); }
+    25% { transform: translate(calc(25vw), 14px); }
+    50% { transform: translate(calc(45vw), -4px); }
+    75% { transform: translate(calc(70vw), 12px); }
+    100% { transform: translate(calc(100vw + 40px), 0); }
+  }
+
+  /* ---------- District progress ---------- */
+  .progress { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .progress .row { display: flex; justify-content: space-between; gap: 8px; }
+  .progress b { color: var(--ink); }
+  .bar { height: 8px; border-radius: 999px; background: #e3e9f3; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--turq), var(--cobalt)); transition: width .3s; }
+
+  /* ---------- Shop ---------- */
+  .shop { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px 0; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    border: 0; background: none; padding: 8px 10px; border-radius: 10px; cursor: pointer; font-weight: 700; color: var(--muted);
+  }
+  .tab[aria-selected="true"] { background: #eef3fc; color: var(--cobalt-deep); }
+  .tab em { font-style: normal; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--cart); color: #fff; font-size: 12px; }
+  .mode { display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .mode button { border: 0; background: none; padding: 5px 9px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .mode button[aria-pressed="true"] { background: var(--cobalt); color: #fff; }
+  .list { list-style: none; margin: 0; padding: 6px 10px 10px; display: grid; }
+  .item { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #edf1f7; }
+  .item:first-child { border-top: 0; }
+  .item .ico svg { width: 44px; height: 44px; display: block; }
+  .item .name { display: block; font-weight: 700; line-height: 1.25; }
+  .item .name small { font-weight: 400; color: var(--muted); margin-left: 4px; }
+  .item .about { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+  .item.locked .ico, .item.locked .name { opacity: .45; }
+  .buy {
+    min-width: 88px; padding: 8px 10px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 700; font-size: 14px;
+    background: var(--cobalt); color: #fff; box-shadow: 0 3px 0 var(--cobalt-deep); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .buy:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cobalt-deep); }
+  .buy:disabled { background: #e6ebf3; color: #8e99ae; box-shadow: none; cursor: default; transform: none; }
+  .buy small { display: block; font-size: 11px; font-weight: 400; opacity: .85; }
+  .empty { padding: 16px 4px; color: var(--muted); font-size: 14px; }
+
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .foot b { color: var(--ink); }
+  .link-btn { border: 0; background: none; padding: 4px 0; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 13px; }
+
+  /* ---------- Toast & modal ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); transform: translate(-50%, 20px); opacity: 0;
+    max-width: min(92vw, 420px); padding: 10px 16px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 14px;
+    box-shadow: 0 10px 26px rgba(22,35,63,.3); transition: opacity .25s, transform .25s; z-index: 30; pointer-events: none; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px; background: rgba(22,35,63,.4); }
+  .card {
+    width: 100%; max-width: 330px; background: var(--surface); border-radius: 18px; padding: 20px 18px; display: grid; gap: 10px;
+    justify-items: center; text-align: center; border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(22,35,63,.2);
+  }
+  .card h3 { margin: 0; font-size: 24px; line-height: 1.15; color: var(--cobalt-deep); text-wrap: balance; }
+  .card p { margin: 0; color: var(--muted); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .btn { border: 0; border-radius: 12px; padding: 11px 18px; cursor: pointer; font-weight: 700; background: var(--cobalt); color: #fff; box-shadow: 0 3px 0 var(--cobalt-deep); }
+  .btn.ghost { background: var(--surface); color: var(--cobalt); box-shadow: inset 0 0 0 2px #c9d6ee; }
+  .btn.danger { background: var(--cart); box-shadow: 0 3px 0 #9e2b22; }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 19px; }
+    .icon-btn { width: 34px; height: 34px; border-radius: 10px; }
+    .buy { min-width: 80px; font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gull { animation-duration: 14s; }
+    .plus, .crumb { animation-duration: .01s; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="head">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="34" fill="none" stroke="#c98a45" stroke-width="22"/><circle cx="50" cy="50" r="34" fill="none" stroke="#e7b36f" stroke-width="10" stroke-dasharray="9 7"/></svg>
+      <h1 class="serif">Симитчи</h1>
+    </div>
+    <div class="toggles">
+      <button class="icon-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="Звук" title="Звук">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" stroke="none"/>
+          <path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>
+          <path class="off" d="M17 9l5 6M22 9l-5 6"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="vibroBtn" type="button" aria-pressed="true" aria-label="Вибрация" title="Вибрация">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="8" y="3" width="8" height="18" rx="2"/>
+          <path class="on" d="M4.5 8v8M2 10v4M19.5 8v8M22 10v4"/>
+          <path class="off" d="M3 3l18 18"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="bank" aria-live="polite">
+    <div class="amount"><span class="coin" aria-hidden="true">₺</span><span id="lira">0</span></div>
+    <div class="rate"><b id="rate">0</b> ₺ в секунду · <b id="perTap">1</b> ₺ за нажатие <span class="buff" id="buff" hidden></span></div>
+  </section>
+
+  <section class="scene" id="scene" aria-label="Тележка симитчи">
+    <svg class="skyline" viewBox="0 0 400 58" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <g fill="#c9dbf1">
+        <rect x="18" y="16" width="3" height="34"/><path d="M17.5 17 L19.5 7 L21.5 17Z"/>
+        <rect x="95" y="16" width="3" height="34"/><path d="M94.5 17 L96.5 7 L98.5 17Z"/>
+        <path d="M36 50 C36 26 78 26 78 50Z"/><path d="M24 50 C24 40 42 40 42 50Z"/><path d="M72 50 C72 40 90 40 90 50Z"/>
+        <rect x="128" y="40" width="14" height="10"/><rect x="144" y="36" width="12" height="14"/><rect x="158" y="42" width="14" height="8"/>
+        <path d="M181 50 L183 24 L195 24 L197 50Z"/><path d="M181 25 L189 9 L197 25Z"/>
+        <rect x="206" y="40" width="12" height="10"/><rect x="220" y="44" width="16" height="6"/>
+        <rect x="244" y="14" width="2.6" height="36"/><path d="M243.6 15 L245.3 6 L247 15Z"/>
+        <rect x="251" y="20" width="2.6" height="30"/><path d="M250.6 21 L252.3 12 L254 21Z"/>
+        <path d="M268 50 C268 28 306 28 306 50Z"/><path d="M258 50 C258 41 274 41 274 50Z"/><path d="M300 50 C300 41 316 41 316 50Z"/>
+        <rect x="320" y="20" width="2.6" height="30"/><path d="M319.6 21 L321.3 12 L323 21Z"/>
+        <rect x="327" y="14" width="2.6" height="36"/><path d="M326.6 15 L328.3 6 L330 15Z"/>
+        <rect x="352" y="22" width="3" height="28"/><rect x="390" y="22" width="3" height="28"/><rect x="340" y="42" width="60" height="2"/>
+        <rect x="0" y="50" width="400" height="8"/>
+      </g>
+    </svg>
+    <svg class="waves" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 22 q12 -6 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0" fill="none" stroke="#e8f2fc" stroke-width="2"/>
+      <path d="M0 44 q12 -6 25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0 t25 0" fill="none" stroke="#e1edf9" stroke-width="2"/>
+      <rect x="0" y="70" width="400" height="30" fill="#d9d2c4"/>
+      <rect x="0" y="70" width="400" height="4" fill="#c7bfaf"/>
+    </svg>
+    <span class="district-tag" id="districtTag">Эминёню</span>
+    <button class="cart-btn" id="cart" type="button" aria-label="Продать симит">
+      <svg viewBox="0 0 200 170" aria-hidden="true">
+        <path d="M24 30 L176 30 L166 16 L34 16 Z" fill="#d6453a"/>
+        <rect x="30" y="30" width="140" height="60" rx="6" fill="#eaf4ff" stroke="#fff" stroke-width="3"/>
+        <g fill="none" stroke="#c98a45" stroke-width="7">
+          <circle cx="52" cy="72" r="11"/><circle cx="82" cy="72" r="11"/><circle cx="112" cy="72" r="11"/><circle cx="142" cy="72" r="11"/>
+          <circle cx="67" cy="50" r="11"/><circle cx="97" cy="50" r="11"/><circle cx="127" cy="50" r="11"/>
+        </g>
+        <g fill="#fff6e3"><circle cx="48" cy="66" r="1.2"/><circle cx="85" cy="78" r="1.2"/><circle cx="115" cy="66" r="1.2"/><circle cx="139" cy="79" r="1.2"/><circle cx="70" cy="44" r="1.2"/><circle cx="100" cy="56" r="1.2"/><circle cx="124" cy="44" r="1.2"/></g>
+        <path d="M34 36 L60 36" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <rect x="20" y="88" width="160" height="48" rx="7" fill="#d6453a"/>
+        <rect x="20" y="106" width="160" height="5" fill="#f0b429"/>
+        <text x="100" y="130" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="17" fill="#fff" letter-spacing="3">SİMİT</text>
+        <path d="M178 100 L196 84" stroke="#8a5a2e" stroke-width="5" stroke-linecap="round"/>
+        <g><circle cx="55" cy="146" r="16" fill="#16233f"/><circle cx="55" cy="146" r="6" fill="#fff"/><circle cx="145" cy="146" r="16" fill="#16233f"/><circle cx="145" cy="146" r="6" fill="#fff"/></g>
+      </svg>
+    </button>
+  </section>
+
+  <section class="progress" aria-live="polite">
+    <div class="row"><span>Район: <b id="districtName">Эминёню</b> <span id="districtBonus"></span></span><span id="districtNext"></span></div>
+    <div class="bar" aria-hidden="true"><span id="districtBar"></span></div>
+  </section>
+
+  <section class="shop" aria-label="Магазин">
+    <div class="shop-head">
+      <div class="tabs" role="tablist">
+        <button class="tab" id="tabHelpers" type="button" role="tab" aria-selected="true">Помощники</button>
+        <button class="tab" id="tabUpgrades" type="button" role="tab" aria-selected="false">Улучшения<em id="upgCount" hidden></em></button>
+      </div>
+      <div class="mode" id="mode" aria-label="Сколько покупать">
+        <button type="button" data-n="1" aria-pressed="true">×1</button>
+        <button type="button" data-n="10" aria-pressed="false">×10</button>
+        <button type="button" data-n="max" aria-pressed="false">Макс</button>
+      </div>
+    </div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <footer class="foot">
+    <span>Всего заработано <b id="total">0</b> ₺ · нажатий <b id="taps">0</b></span>
+    <button class="link-btn" id="resetBtn" type="button">Начать заново</button>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="modal" id="modal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 class="serif" id="mTitle"></h3>
+    <p id="mText"></p>
+    <div class="actions">
+      <button class="btn" id="mOk" type="button"></button>
+      <button class="btn ghost" id="mCancel" type="button">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const now = () => Date.now();
+
+  // ---------- Content ----------
+  const ICON = {
+    cirak: '<circle cx="22" cy="22" r="21" fill="#fde7c7"/><circle cx="22" cy="24" r="9" fill="#f1c7a0"/><path d="M12 20 Q22 8 32 20 Z" fill="#d6453a"/><rect x="11" y="19" width="22" height="3" rx="1.5" fill="#a8332a"/><circle cx="19" cy="25" r="1.3" fill="#16233f"/><circle cx="25" cy="25" r="1.3" fill="#16233f"/><path d="M19 29 q3 2 6 0" stroke="#16233f" stroke-width="1.3" fill="none" stroke-linecap="round"/>',
+    tray: '<circle cx="22" cy="22" r="21" fill="#e5f0fc"/><rect x="8" y="27" width="28" height="4" rx="2" fill="#8a5a2e"/><g fill="none" stroke="#c98a45" stroke-width="3.5"><circle cx="15" cy="22" r="4.5"/><circle cx="25" cy="22" r="4.5"/><circle cx="20" cy="15" r="4.5"/></g>',
+    cart: '<circle cx="22" cy="22" r="21" fill="#fde4e1"/><rect x="9" y="12" width="26" height="9" rx="2" fill="#eaf4ff" stroke="#d6453a" stroke-width="1.5"/><rect x="8" y="21" width="28" height="9" rx="2" fill="#d6453a"/><circle cx="14" cy="33" r="3.5" fill="#16233f"/><circle cx="30" cy="33" r="3.5" fill="#16233f"/><circle cx="16" cy="16.5" r="2.4" fill="none" stroke="#c98a45" stroke-width="1.8"/><circle cx="22" cy="16.5" r="2.4" fill="none" stroke="#c98a45" stroke-width="1.8"/><circle cx="28" cy="16.5" r="2.4" fill="none" stroke="#c98a45" stroke-width="1.8"/>',
+    firin: '<circle cx="22" cy="22" r="21" fill="#fbe9d6"/><path d="M8 34 V22 A14 12 0 0 1 36 22 V34 Z" fill="#b97a4a"/><path d="M14 34 V26 A8 7 0 0 1 30 26 V34 Z" fill="#3d2410"/><path d="M18 34 Q19 28 22 30 Q24 26 26 34 Z" fill="#f08a24"/>',
+    cay: '<circle cx="22" cy="22" r="21" fill="#e2f5f3"/><ellipse cx="22" cy="35" rx="11" ry="3" fill="#d6453a"/><path d="M15 12 H29 Q26 20 28 26 Q27 33 22 33 Q17 33 16 26 Q18 20 15 12 Z" fill="#f7fbff" stroke="#9fb4cc" stroke-width="1"/><path d="M16.6 18 H27.4 Q25.6 22 27 26 Q26.3 31.5 22 31.5 Q17.7 31.5 17 26 Q18.4 22 16.6 18 Z" fill="#b5381f"/>',
+    vapur: '<circle cx="22" cy="22" r="21" fill="#e5f0fc"/><path d="M6 27 H38 L34 33 H10 Z" fill="#fff" stroke="#16233f" stroke-width="1.5"/><rect x="12" y="20" width="20" height="7" rx="1" fill="#fff" stroke="#16233f" stroke-width="1.5"/><rect x="20" y="13" width="4" height="7" fill="#d6453a"/><rect x="20" y="13" width="4" height="2" fill="#16233f"/><path d="M6 37 q4 -3 8 0 t8 0 t8 0 t8 0" stroke="#2f6fd0" stroke-width="1.5" fill="none"/>',
+    chain: '<circle cx="22" cy="22" r="21" fill="#fff2d9"/><g fill="none" stroke="#c98a45" stroke-width="4"><circle cx="14" cy="24" r="6"/><circle cx="30" cy="24" r="6"/><circle cx="22" cy="15" r="6"/></g><g fill="none" stroke="#d6453a" stroke-width="1.5"><path d="M20 21 L24 21"/><path d="M17 28 L27 28"/></g>',
+    factory: '<circle cx="22" cy="22" r="21" fill="#eceff5"/><path d="M8 34 V22 L15 26 V22 L22 26 V22 L29 26 V14 H34 V34 Z" fill="#5d6d86"/><rect x="12" y="29" width="4" height="3" fill="#f0b429"/><rect x="20" y="29" width="4" height="3" fill="#f0b429"/><path d="M31 12 q2 -3 0 -6" stroke="#b3bfd3" stroke-width="2" fill="none" stroke-linecap="round"/>',
+    up: '<circle cx="22" cy="22" r="21" fill="#eef3fc"/><path d="M22 11 L31 21 H25 V33 H19 V21 H13 Z" fill="#2350b8"/>',
+  };
+  const svg = (k, size = 44) => `<svg viewBox="0 0 44 44" width="${size}" height="${size}" aria-hidden="true">${ICON[k]}</svg>`;
+
+  const HELPERS = [
+    { id: 'cirak', name: 'Чырак', about: 'Мальчик-помощник разносит симиты по лавкам.', cost: 15, rate: 0.1 },
+    { id: 'tray', name: 'Лоток у причала', about: 'Пассажиры вапуров берут симит на бегу.', cost: 100, rate: 1 },
+    { id: 'cart', name: 'Тележка на Истикляле', about: 'Самая людная улица города.', cost: 1100, rate: 8 },
+    { id: 'firin', name: 'Фырын', about: 'Своя пекарня: симиты прямо из печи.', cost: 12000, rate: 47 },
+    { id: 'cay', name: 'Чайхана', about: 'С чаем симит уходит вдвое охотнее.', cost: 130000, rate: 260 },
+    { id: 'vapur', name: 'Буфет на вапуре', about: 'Каждый рейс через Босфор — сотни покупателей.', cost: 1.4e6, rate: 1400 },
+    { id: 'chain', name: 'Сеть симитчи', about: 'Тележки с вашим именем по всему городу.', cost: 2e7, rate: 7800 },
+    { id: 'factory', name: 'Фабрика в Бейкозе', about: 'Симиты едут даже в Анкару.', cost: 3.3e8, rate: 44000 },
+  ];
+  const GROWTH = 1.15;
+
+  const UPGRADES = [
+    { id: 'sesame', name: 'Кунжута побольше', about: 'Каждое нажатие приносит вдвое больше.', cost: 100, kind: 'tap', val: 2, show: s => s.total >= 30 },
+    { id: 'pekmez', name: 'Виноградный петмез', about: 'Симит с петмезом: ещё ×2 за нажатие.', cost: 2000, kind: 'tap', val: 2, show: s => s.total >= 800 },
+    { id: 'hands', name: 'Ловкие руки', about: 'Нажатие приносит ещё 2% дохода в секунду.', cost: 25000, kind: 'pct', val: 0.02, show: s => s.total >= 8000 },
+    { id: 'tea', name: 'Чай в подарок', about: 'Стакан чая к симиту: +10% ко всему доходу.', cost: 50000, kind: 'global', val: 0.1, show: s => s.total >= 20000 },
+    { id: 'gulls', name: 'Прикормить чаек', about: 'Чайки удачи прилетают вдвое чаще.', cost: 200000, kind: 'gull', val: 2, show: s => s.total >= 50000 },
+    { id: 'kasar', name: 'Симит с кашаром', about: 'Сыр внутри: ещё ×2 за нажатие.', cost: 500000, kind: 'tap', val: 2, show: s => s.total >= 200000 },
+    { id: 'nazar', name: 'Назар над прилавком', about: 'Удача в торговле: +15% ко всему доходу.', cost: 5e6, kind: 'global', val: 0.15, show: s => s.total >= 1e6 },
+    { id: 'hands2', name: 'Руки мастера', about: 'Нажатие приносит ещё 3% дохода в секунду.', cost: 1e7, kind: 'pct', val: 0.03, show: s => s.total >= 5e6 },
+    { id: 'sign', name: 'Вывеска с изразцами', about: 'Лавку узнают издалека: +25% ко всему доходу.', cost: 5e8, kind: 'global', val: 0.25, show: s => s.total >= 1e8 },
+  ];
+  HELPERS.forEach(h => [10, 25, 50].forEach((n, i) => UPGRADES.push({
+    id: `${h.id}-${n}`, name: `${h.name}: опыт ${['I', 'II', 'III'][i]}`, about: `«${h.name}» приносит вдвое больше.`,
+    cost: h.cost * [12, 60, 400][i], kind: 'helper', helper: h.id, val: 2, show: s => (s.owned[h.id] || 0) >= n,
+  })));
+
+  const DISTRICTS = [
+    { at: 0, name: 'Эминёню' }, { at: 1e4, name: 'Каракёй' }, { at: 1e6, name: 'Галата' },
+    { at: 1e8, name: 'Бешикташ' }, { at: 1e10, name: 'Кадыкёй' }, { at: 1e12, name: 'Весь Стамбул' },
+  ];
+
+  // ---------- Save (per browser; the game runs without it) ----------
+  const KEY = 'simitci-save';
+  const fresh = () => ({ lira: 0, total: 0, taps: 0, owned: {}, ups: {}, last: now(), sound: true, vibro: true, mode: '1', buffUntil: 0, buffMult: 1 });
+  let S = fresh();
+  try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch (e) {}
+  const save = () => { S.last = now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  // ---------- Numbers ----------
+  function fmt(n) {
+    if (n < 10 && n % 1) return n.toFixed(1).replace('.', ',');
+    if (n < 1e6) return Math.floor(n).toLocaleString('ru-RU');
+    for (const [v, u] of [[1e15, 'квдрлн'], [1e12, 'трлн'], [1e9, 'млрд'], [1e6, 'млн']]) {
+      if (n >= v) { const x = n / v; return (x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : Math.floor(x).toString()).replace('.', ',') + ' ' + u; }
+    }
+  }
+
+  // ---------- Economy ----------
+  const districtIndex = () => { let i = 0; DISTRICTS.forEach((d, k) => { if (S.total >= d.at) i = k; }); return i; };
+  const buffActive = () => now() < S.buffUntil;
+  function globalMult() {
+    let m = 1;
+    for (const u of UPGRADES) if (S.ups[u.id] && u.kind === 'global') m += u.val;
+    m *= 1 + 0.2 * districtIndex();
+    if (buffActive()) m *= S.buffMult;
+    return m;
+  }
+  function helperRate(h) {
+    let r = h.rate;
+    for (const u of UPGRADES) if (S.ups[u.id] && u.kind === 'helper' && u.helper === h.id) r *= u.val;
+    return r;
+  }
+  const income = () => HELPERS.reduce((sum, h) => sum + helperRate(h) * (S.owned[h.id] || 0), 0) * globalMult();
+  function tapValue() {
+    let t = 1, pct = 0;
+    for (const u of UPGRADES) if (S.ups[u.id]) { if (u.kind === 'tap') t *= u.val; if (u.kind === 'pct') pct += u.val; }
+    return t * globalMult() + income() * pct;
+  }
+  const costOf = (h, k) => { const n = S.owned[h.id] || 0; return h.cost * Math.pow(GROWTH, n) * (Math.pow(GROWTH, k) - 1) / (GROWTH - 1); };
+  function maxAfford(h) {
+    const n = S.owned[h.id] || 0, first = h.cost * Math.pow(GROWTH, n);
+    return Math.max(0, Math.floor(Math.log(S.lira * (GROWTH - 1) / first + 1) / Math.log(GROWTH)));
+  }
+  const earn = x => { S.lira += x; S.total += x; };
+
+  // ---------- Sound & haptics ----------
+  const sfx = (() => {
+    let ctx = null, master = null;
+    function ensure() {
+      if (!S.sound) return null;
+      try {
+        if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.2; master.connect(ctx.destination); }
+        if (ctx.state === 'suspended') ctx.resume();
+      } catch (e) { return null; }
+      return ctx;
+    }
+    function tone(f, d, o = {}) {
+      const c = ensure(); if (!c) return;
+      const t0 = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain();
+      osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t0);
+      if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + d);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(o.gain || 0.15, t0 + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+      osc.connect(g); g.connect(master); osc.start(t0); osc.stop(t0 + d + 0.03);
+    }
+    return {
+      unlock: ensure,
+      tap() { tone(520 + Math.random() * 180, 0.07, { type: 'triangle', gain: 0.12, to: 760 }); },
+      buy() { tone(660, 0.08, { type: 'triangle', gain: 0.14 }); tone(990, 0.12, { type: 'triangle', gain: 0.12, at: 0.07 }); },
+      nope() { tone(220, 0.1, { type: 'triangle', gain: 0.12 }); },
+      gull() { tone(1300, 0.16, { gain: 0.06, to: 900 }); tone(1500, 0.14, { gain: 0.05, to: 1000, at: 0.16 }); },
+      level() { [293.66, 311.13, 369.99, 392, 440, 587.33].forEach((f, i) => tone(f, 0.24, { type: 'triangle', gain: 0.14, at: i * 0.1 })); },
+    };
+  })();
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const canVibrate = typeof navigator.vibrate === 'function';
+  let tapSwitch = null;
+  function haptic(p) {
+    if (!S.vibro) return;
+    if (canVibrate) { try { navigator.vibrate(p); } catch (e) {} return; }
+    if (!isIOS) return;
+    try {
+      if (!tapSwitch) {
+        tapSwitch = document.createElement('label'); tapSwitch.style.display = 'none'; tapSwitch.setAttribute('aria-hidden', 'true');
+        const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); tapSwitch.appendChild(i); document.body.appendChild(tapSwitch);
+      }
+      tapSwitch.click();
+    } catch (e) {}
+  }
+  if (!canVibrate && !isIOS) $('vibroBtn').hidden = true;
+  function syncToggles() { $('soundBtn').setAttribute('aria-pressed', String(S.sound)); $('vibroBtn').setAttribute('aria-pressed', String(S.vibro)); }
+  $('soundBtn').addEventListener('click', () => { S.sound = !S.sound; syncToggles(); save(); sfx.tap(); });
+  $('vibroBtn').addEventListener('click', () => { S.vibro = !S.vibro; syncToggles(); save(); haptic(15); });
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => sfx.unlock(), { passive: true }));
+
+  // ---------- Toast & modal ----------
+  let toastTimer = null;
+  function toast(text) {
+    const t = $('toast'); t.textContent = text; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+  let onOk = null;
+  function modal(title, text, okLabel, cb, cancel = true, danger = false) {
+    $('mTitle').textContent = title; $('mText').textContent = text; $('mOk').textContent = okLabel;
+    $('mOk').classList.toggle('danger', danger); $('mCancel').hidden = !cancel;
+    onOk = cb; $('modal').hidden = false; $('mOk').focus({ preventScroll: true });
+  }
+  const closeModal = () => { $('modal').hidden = true; onOk = null; };
+  $('mOk').addEventListener('click', () => { const cb = onOk; closeModal(); if (cb) cb(); });
+  $('mCancel').addEventListener('click', closeModal);
+  $('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
+
+  // ---------- Tapping the cart ----------
+  const scene = $('scene'), cart = $('cart');
+  const CRUMB = '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" fill="none" stroke="#c98a45" stroke-width="4"/></svg>';
+  function sell(x, y) {
+    const v = tapValue();
+    earn(v); S.taps++;
+    const r = scene.getBoundingClientRect();
+    const px = x != null ? x - r.left : r.width / 2, py = y != null ? y - r.top : r.height * 0.55;
+    const p = document.createElement('div');
+    p.className = 'plus'; p.textContent = '+' + fmt(v) + ' ₺'; p.style.left = px + 'px'; p.style.top = py + 'px';
+    scene.appendChild(p); setTimeout(() => p.remove(), 950);
+    const c = document.createElement('div');
+    c.className = 'crumb'; c.innerHTML = CRUMB; c.style.left = (px - 9) + 'px'; c.style.top = (py - 9) + 'px';
+    c.style.setProperty('--dx', (Math.random() * 80 - 40) + 'px');
+    scene.appendChild(c); setTimeout(() => c.remove(), 850);
+    cart.classList.add('press'); setTimeout(() => cart.classList.remove('press'), 80);
+    sfx.tap(); haptic(5);
+    render();
+  }
+  cart.addEventListener('pointerdown', e => { e.preventDefault(); sell(e.clientX, e.clientY); });
+  cart.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sell(); } });
+  cart.addEventListener('click', e => { if (e.detail === 0) sell(); });
+
+  // ---------- Seagull of luck ----------
+  const GULL = '<svg viewBox="0 0 64 44" aria-hidden="true"><path d="M4 26 Q18 6 32 22 Q46 6 60 26" fill="none" stroke="#16233f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 26 Q18 6 32 22 Q46 6 60 26" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="24" r="4" fill="#f0b429"/></svg>';
+  let nextGull = now() + 40000;
+  function spawnGull() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'gull'; b.innerHTML = GULL; b.setAttribute('aria-label', 'Поймать чайку удачи');
+    b.addEventListener('click', () => {
+      b.remove();
+      sfx.gull(); haptic([15, 40, 15]);
+      if (Math.random() < 0.55 && income() > 0) {
+        S.buffMult = 5; S.buffUntil = now() + 20000;
+        toast('Чайка удачи: доход ×5 на 20 секунд!');
+      } else {
+        const gift = Math.max(income() * 90, tapValue() * 30, 25);
+        earn(gift);
+        toast(`Чайка принесла ${fmt(gift)} ₺`);
+      }
+      render(true);
+    });
+    scene.appendChild(b);
+    setTimeout(() => b.remove(), 9200);
+  }
+
+  // ---------- Shop ----------
+  let tab = 'helpers';
+  const available = () => UPGRADES.filter(u => !S.ups[u.id] && u.show(S)).sort((a, b) => a.cost - b.cost);
+  function buyCount(h) {
+    if (S.mode === 'max') return Math.max(1, maxAfford(h));
+    return Number(S.mode);
+  }
+  function renderShop() {
+    const list = $('list');
+    const rows = [];
+    if (tab === 'helpers') {
+      let shownLocked = false;
+      HELPERS.forEach((h, i) => {
+        const prevOwned = i === 0 || (S.owned[HELPERS[i - 1].id] || 0) > 0 || (S.owned[h.id] || 0) > 0;
+        // Only the next locked helper is teased; the rest stay hidden.
+        if (!prevOwned) { if (shownLocked) return; shownLocked = true; }
+        const k = buyCount(h), cost = costOf(h, k), own = S.owned[h.id] || 0;
+        rows.push(`<li class="item${prevOwned ? '' : ' locked'}">
+          <span class="ico">${svg(h.id)}</span>
+          <span><span class="name">${prevOwned ? h.name : '???'}<small>${own ? '× ' + own : ''}</small></span>
+            <span class="about">${prevOwned ? h.about + ' +' + fmt(helperRate(h) * globalMult()) + ' ₺/с за каждого.' : 'Откроется после покупки предыдущего помощника.'}</span></span>
+          <button class="buy" type="button" data-h="${h.id}" ${prevOwned && S.lira >= cost ? '' : 'disabled'}>${fmt(cost)} ₺<small>${k > 1 ? 'купить ' + k : 'нанять'}</small></button>
+        </li>`);
+      });
+    } else {
+      const ups = available();
+      if (!ups.length) rows.push('<li class="empty">Новые улучшения появятся по мере роста торговли.</li>');
+      for (const u of ups) {
+        rows.push(`<li class="item">
+          <span class="ico">${u.kind === 'helper' ? svg(u.helper) : svg('up')}</span>
+          <span><span class="name">${u.name}</span><span class="about">${u.about}</span></span>
+          <button class="buy" type="button" data-u="${u.id}" ${S.lira >= u.cost ? '' : 'disabled'}>${fmt(u.cost)} ₺<small>купить</small></button>
+        </li>`);
+      }
+    }
+    list.innerHTML = rows.join('');
+    $('mode').hidden = tab !== 'helpers';
+    const n = available().filter(u => S.lira >= u.cost).length;
+    $('upgCount').hidden = !n; $('upgCount').textContent = n;
+  }
+  $('list').addEventListener('click', e => {
+    const b = e.target.closest('.buy');
+    if (!b || b.disabled) return;
+    if (b.dataset.h) {
+      const h = HELPERS.find(x => x.id === b.dataset.h), k = buyCount(h), cost = costOf(h, k);
+      if (S.lira < cost) return sfx.nope();
+      S.lira -= cost; S.owned[h.id] = (S.owned[h.id] || 0) + k;
+      toast(`${h.name}: теперь ${S.owned[h.id]}`);
+    } else {
+      const u = UPGRADES.find(x => x.id === b.dataset.u);
+      if (S.lira < u.cost) return sfx.nope();
+      S.lira -= u.cost; S.ups[u.id] = true;
+      toast(`Куплено: ${u.name}`);
+    }
+    sfx.buy(); haptic(12); save(); render(true);
+  });
+  function setTab(t) {
+    tab = t;
+    $('tabHelpers').setAttribute('aria-selected', String(t === 'helpers'));
+    $('tabUpgrades').setAttribute('aria-selected', String(t === 'upgrades'));
+    renderShop();
+  }
+  $('tabHelpers').addEventListener('click', () => setTab('helpers'));
+  $('tabUpgrades').addEventListener('click', () => setTab('upgrades'));
+  $('mode').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.mode = b.dataset.n;
+    for (const x of $('mode').children) x.setAttribute('aria-pressed', String(x === b));
+    renderShop(); save();
+  });
+
+  // ---------- Render ----------
+  let lastDistrict = districtIndex(), shopKey = '';
+  function render(forceShop) {
+    $('lira').textContent = fmt(S.lira);
+    $('rate').textContent = fmt(income());
+    $('perTap').textContent = fmt(tapValue());
+    const b = $('buff');
+    if (buffActive()) { b.hidden = false; b.textContent = `· ×${S.buffMult} ещё ${Math.ceil((S.buffUntil - now()) / 1000)} с`; } else b.hidden = true;
+    const di = districtIndex(), d = DISTRICTS[di], next = DISTRICTS[di + 1];
+    $('districtName').textContent = d.name; $('districtTag').textContent = d.name;
+    $('districtBonus').textContent = di ? `(+${di * 20}% к доходу)` : '';
+    if (next) {
+      const span = Math.log10(Math.max(next.at, 1)) - Math.log10(Math.max(d.at, 1));
+      const done = Math.log10(Math.max(S.total, 1)) - Math.log10(Math.max(d.at, 1));
+      $('districtNext').textContent = `дальше ${next.name} — ${fmt(next.at)} ₺`;
+      $('districtBar').style.width = Math.min(100, Math.max(0, done / span * 100)) + '%';
+    } else { $('districtNext').textContent = 'все районы открыты'; $('districtBar').style.width = '100%'; }
+    if (di > lastDistrict) { lastDistrict = di; sfx.level(); haptic([20, 50, 20]); toast(`Новый район: ${d.name}! Доход +20%`); forceShop = true; }
+    $('total').textContent = fmt(S.total); $('taps').textContent = S.taps.toLocaleString('ru-RU');
+    // Rebuild the shop only when what it shows could change.
+    const key = tab + S.mode + HELPERS.map(h => (S.owned[h.id] || 0) + (S.lira >= costOf(h, buyCount(h)) ? 'y' : 'n')).join() + available().map(u => u.id + (S.lira >= u.cost ? 'y' : 'n')).join();
+    if (forceShop || key !== shopKey) { shopKey = key; renderShop(); }
+  }
+
+  // ---------- Loop ----------
+  let prev = performance.now(), saveAt = now() + 5000;
+  function tick(t) {
+    const dt = Math.min(1, (t - prev) / 1000); prev = t;
+    const inc = income();
+    if (inc > 0) earn(inc * dt);
+    if (!document.hidden && now() > nextGull) {
+      spawnGull();
+      nextGull = now() + (45000 + Math.random() * 45000) / (S.ups.gulls ? 2 : 1);
+    }
+    if (now() > saveAt) { save(); saveAt = now() + 5000; }
+    render();
+    requestAnimationFrame(tick);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else prev = performance.now(); });
+  window.addEventListener('pagehide', save);
+
+  $('resetBtn').addEventListener('click', () => modal('Начать заново?', 'Лиры, помощники и улучшения обнулятся. Это нельзя отменить.', 'Начать заново', () => {
+    const keep = { sound: S.sound, vibro: S.vibro };
+    S = Object.assign(fresh(), keep); lastDistrict = 0; save(); render(true); toast('Новая тележка, новый день');
+  }, true, true));
+
+  // ---------- Start ----------
+  function start(data) {
+    if (data && data.S) S = Object.assign(fresh(), data.S);
+    syncToggles();
+    for (const x of $('mode').children) x.setAttribute('aria-pressed', String(x.dataset.n === S.mode));
+    // Helpers kept selling while the page was closed (half speed, up to 8 hours).
+    const away = Math.min((now() - S.last) / 1000, 8 * 3600), inc = income();
+    if (!(data && data.S) && away > 60 && inc > 0) {
+      const got = inc * away * 0.5;
+      earn(got);
+      const h = Math.floor(away / 3600), m = Math.round((away % 3600) / 60);
+      modal('С возвращением!', `Пока вас не было ${h ? h + ' ч ' : ''}${m} мин, помощники продали симитов на ${fmt(got)} ₺.`, 'Забрать', null, false);
+    }
+    lastDistrict = districtIndex();
+    render(true);
+    requestAnimationFrame(t => { prev = t; tick(t); });
+  }
+  window.claude?.hot?.snapshot?.(() => ({ S }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+  if (location.hash === '#test') window.__sim = { S: () => S, income, tapValue, sell, spawnGull, render };
+})();
+</script>
+</body>
+</html>
