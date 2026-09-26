@@ -4,7 +4,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/koid38/super-meme/HEAD/istanbul/deploy.sh | sh
 set -e
 
-SRC="https://raw.githubusercontent.com/koid38/super-meme/HEAD/istanbul/index.html"
+SRC="https://raw.githubusercontent.com/koid38/super-meme/HEAD/istanbul/index.html?t=$(date +%s)"
 NAME="istanbul"
 
 if [ "$(id -u)" != 0 ]; then
