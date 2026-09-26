@@ -48,6 +48,7 @@
     gap: 14px;
   }
   button { font: inherit; color: inherit; }
+  .app > * { min-width: 0; }
 
   /* ---------- Header ---------- */
   .head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 6px; }
@@ -82,10 +83,10 @@
     padding: 10px 12px; display: grid; gap: 7px; box-shadow: 0 4px 14px rgba(22,35,63,.06);
   }
   .level-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .lvl { margin: 0; display: grid; min-width: 0; font-size: 15px; font-weight: 700; line-height: 1.25; }
+  .lvl { margin: 0; display: grid; min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; font-size: 15px; font-weight: 700; line-height: 1.25; }
   .lvl .eyebrow { font-size: inherit; color: var(--ink); }
   .lvl-name { color: var(--ink); }
-  .eyebrow { font-size: inherit; font-weight: 700; color: var(--turq); white-space: nowrap; }
+  .eyebrow { font-size: inherit; font-weight: 700; color: var(--turq); }
   .caption {
     margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; cursor: pointer;
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
@@ -1427,8 +1428,8 @@ function dailyDef(date) {
     return Object.values(need).every(v => v <= 0) && engine.dustLeft() === 0 && o.cat + o.tea + o.cart === 0;
   }
   function hud() {
-    $('lvlNum').textContent = mode === 'daily' ? 'Задание дня · ' + today() : 'Уровень ' + level;
-    $('lvlName').textContent = def.name;
+    $('lvlNum').textContent = mode === 'daily' ? 'Задание дня' : 'Уровень ' + level;
+    $('lvlName').textContent = mode === 'daily' ? today() : def.name;
     $('lvlCaption').textContent = def.caption;
     $('moves').textContent = movesLeft;
     $('movesWord').textContent = plural(movesLeft, 'ход', 'хода', 'ходов');
