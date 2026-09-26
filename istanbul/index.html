@@ -91,8 +91,7 @@
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
   }
   .caption.open { display: block; }
-  .meta-row { display: flex; align-items: baseline; gap: 10px; }
-  .meta-row .caption { flex: 1 1 auto; min-width: 0; }
+  .shop-col { display: grid; justify-items: end; gap: 4px; flex: none; }
   .best { flex: none; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .best b { color: var(--ink); font-weight: 700; }
   .hair { margin: 1px 0; border: 0; border-top: 1px solid #e6ebf3; }
@@ -373,15 +372,15 @@
   <section class="level">
     <div class="level-top">
       <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="lvl-name" id="lvlName">Султанахмет</span></h2>
-      <div class="shop">
-        <div class="boosts" id="boosts" aria-label="Бонусы"></div>
-        <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
+      <div class="shop-col">
+        <div class="shop">
+          <div class="boosts" id="boosts" aria-label="Бонусы"></div>
+          <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
+        </div>
+        <span class="best"><span id="bestLabel">Рекорд</span> <b id="best">—</b></span>
       </div>
     </div>
-    <div class="meta-row">
-      <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
-      <span class="best"><span id="bestLabel">Рекорд</span> <b id="best">—</b></span>
-    </div>
+    <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
     <hr class="hair">
     <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
     <div class="scorebar">
