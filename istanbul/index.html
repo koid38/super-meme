@@ -91,6 +91,11 @@
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
   }
   .caption.open { display: block; }
+  .meta-row { display: flex; align-items: baseline; gap: 10px; }
+  .meta-row .caption { flex: 1 1 auto; min-width: 0; }
+  .best { flex: none; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .best b { color: var(--ink); font-weight: 700; }
+  .hair { margin: 1px 0; border: 0; border-top: 1px solid #e6ebf3; }
   .moves {
     flex: none; display: flex; align-items: baseline; gap: 4px; border-radius: 999px; padding: 2px 11px 3px;
     background: #eef3fc; color: var(--cobalt-deep);
@@ -373,10 +378,14 @@
         <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
       </div>
     </div>
-    <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
+    <div class="meta-row">
+      <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
+      <span class="best"><span id="bestLabel">Рекорд</span> <b id="best">—</b></span>
+    </div>
+    <hr class="hair">
     <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
     <div class="scorebar">
-      <div class="scoreline"><span>Очки <b id="score">0</b></span><span><span id="bestLabel">Рекорд</span> <b id="best">—</b></span></div>
+      <div class="scoreline"><span>Очки <b id="score">0</b></span></div>
       <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
     </div>
   </section>
