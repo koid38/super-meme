@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='47' fill='%231f4fbf'/%3E%3Ccircle cx='50' cy='50' r='31' fill='%23fff'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%236cc0f2'/%3E%3Ccircle cx='50' cy='50' r='11' fill='%2310204a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Yeseva+One&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&family=Yeseva+One&display=swap">
 <style>
   :root {
     color-scheme: light;
@@ -76,7 +76,7 @@
   .level-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .lvl { margin: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; font-weight: 400; }
   .lvl .serif { font-size: 20px; line-height: 1.1; color: var(--ink); }
-  .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--turq); white-space: nowrap; }
+  .eyebrow { font-size: 13px; font-weight: 800; color: var(--turq); white-space: nowrap; }
   .caption {
     margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; cursor: pointer;
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
@@ -87,7 +87,7 @@
     background: #eef3fc; color: var(--cobalt-deep);
   }
   .moves b { font-size: 22px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .moves span { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .moves span { font-size: 12px; font-weight: 800; color: var(--muted); }
   .moves.low { background: #fdecea; color: var(--coral); }
   .moves.low b { display: inline-block; animation: pulse 1s ease-in-out infinite; }
   @keyframes pulse { 50% { transform: scale(1.1); } }
@@ -178,7 +178,7 @@
     text-shadow: 0 2px 0 #fff, 0 0 18px rgba(255,255,255,.95);
     animation: float 1.15s ease-out forwards;
   }
-  .float small { display: block; text-align: center; font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--turq); }
+  .float small { display: block; text-align: center; font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 800; color: var(--turq); }
   @keyframes float {
     0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); }
     20% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
@@ -206,7 +206,7 @@
   .btn.ghost { background: var(--surface); color: var(--cobalt); box-shadow: inset 0 0 0 2px #c9d6ee; }
 
   /* ---------- Route ---------- */
-  .section-title { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .section-title { margin: 0; font-size: 16px; font-weight: 800; color: var(--ink); }
   .route { display: grid; gap: 8px; }
   .route-scroll { overflow-x: auto; margin-inline: -16px; padding-inline: 16px; padding-block: 2px 6px; scrollbar-width: thin; }
   .route ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; width: max-content; }
@@ -214,7 +214,7 @@
     display: grid; gap: 2px; min-width: 104px; padding: 8px 10px; text-align: left; cursor: pointer;
     background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   }
-  .route-item .n { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--turq); }
+  .route-item .n { font-size: 11px; font-weight: 800; color: var(--turq); }
   .route-item .nm { font-weight: 800; font-size: 14px; white-space: nowrap; }
   .route-item .st { font-size: 13px; letter-spacing: 1px; color: #c9d1df; }
   .route-item .st i { font-style: normal; color: var(--gold); }
@@ -251,8 +251,8 @@
   .map { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #f6f9fd; }
   .map svg { display: block; width: 100%; height: auto; }
   .water { fill: #d3e5f7; stroke: #b7d0ec; stroke-width: 1.5; }
-  .sea { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 8px; letter-spacing: .22em; fill: #7d9cc4; text-anchor: middle; }
-  .land { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 9px; letter-spacing: .28em; fill: #b3bfd3; text-anchor: middle; }
+  .sea { font-family: "Nunito", sans-serif; font-weight: 400; font-size: 10px; fill: #7d9cc4; text-anchor: middle; }
+  .land { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 11px; fill: #b3bfd3; text-anchor: middle; }
   .stop { cursor: pointer; outline: none; }
   .stop .dot { fill: var(--cobalt); stroke: #fff; stroke-width: 2.5; }
   .stop .num { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 10px; fill: #fff; pointer-events: none; }
@@ -383,13 +383,13 @@
     <div class="map">
       <svg viewBox="0 0 360 320" role="group" aria-label="Карта маршрута по Стамбулу">
         <rect width="360" height="320" fill="#f6f9fd"/>
-        <text x="60" y="40" class="land">ЕВРОПА</text><text x="306" y="40" class="land">АЗИЯ</text>
+        <text x="60" y="40" class="land">Европа</text><text x="306" y="40" class="land">Азия</text>
         <path class="water" d="M234 0 C226 30 232 70 224 110 C216 150 222 190 210 226 C200 252 204 268 196 282 C150 286 60 284 0 290 V320 H360 V286 C320 282 280 282 262 272 C248 262 250 236 252 210 C254 180 256 150 258 120 C262 90 262 50 272 0 Z"/>
         <path class="water" d="M212 226 C185 216 140 200 100 186 C75 177 55 168 38 166 L36 174 C56 178 78 188 104 198 C140 212 180 230 206 246 Z"/>
         <g stroke="#8fa9c9" stroke-width="2" stroke-linecap="round"><line x1="222" y1="99" x2="263" y2="95"/><line x1="231" y1="90" x2="231" y2="104"/><line x1="254" y1="86" x2="254" y2="100"/></g>
-        <text x="246" y="170" transform="rotate(-82 246 170)" class="sea">БОСФОР</text>
-        <text x="62" y="165" transform="rotate(21 62 165)" class="sea">ЗОЛОТОЙ РОГ</text>
-        <text x="74" y="309" class="sea">МРАМОРНОЕ МОРЕ</text>
+        <text x="246" y="170" transform="rotate(-82 246 170)" class="sea">Босфор</text>
+        <text x="62" y="165" transform="rotate(21 62 165)" class="sea">Золотой Рог</text>
+        <text x="74" y="309" class="sea">Мраморное море</text>
         <g id="stops"></g>
       </svg>
     </div>
