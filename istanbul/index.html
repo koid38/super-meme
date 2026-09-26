@@ -91,9 +91,8 @@
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
   }
   .caption.open { display: block; }
-  .shop-col { display: grid; justify-items: end; gap: 4px; flex: none; }
-  .best { flex: none; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .best b { color: var(--ink); font-weight: 700; }
+  .best { font-size: 13px; font-weight: 400; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .best b { font-weight: 400; }
   .hair { margin: 1px 0; border: 0; border-top: 1px solid #e6ebf3; }
   .moves {
     flex: none; display: flex; align-items: baseline; gap: 4px; border-radius: 999px; padding: 2px 11px 3px;
@@ -371,13 +370,10 @@
 
   <section class="level">
     <div class="level-top">
-      <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="lvl-name" id="lvlName">Султанахмет</span></h2>
-      <div class="shop-col">
-        <div class="shop">
-          <div class="boosts" id="boosts" aria-label="Бонусы"></div>
-          <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
-        </div>
-        <span class="best"><span id="bestLabel">Рекорд</span> <b id="best">—</b></span>
+      <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span><span class="lvl-name" id="lvlName">Султанахмет</span> <span class="best" id="bestBox" hidden>(<span id="bestLabel">рекорд</span> <b id="best"></b>)</span></span></h2>
+      <div class="shop">
+        <div class="boosts" id="boosts" aria-label="Бонусы"></div>
+        <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
       </div>
     </div>
     <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
@@ -1431,8 +1427,9 @@ function dailyDef(date) {
     $('movesBox').classList.toggle('low', movesLeft <= 5 && !over);
     $('score').textContent = score;
     const best = mode === 'daily' ? progress.daily[def.seed] : progress.best[level];
-    $('bestLabel').textContent = mode === 'daily' ? 'Рекорд дня' : 'Рекорд';
-    $('best').textContent = best || '—';
+    $('bestLabel').textContent = mode === 'daily' ? 'рекорд дня' : 'рекорд';
+    $('best').textContent = best || '';
+    $('bestBox').hidden = !best;
     for (const li of $('goals').children) {
       const left = goalLeft(li.dataset.type);
       li.querySelector('b').textContent = left > 0 ? left : '✓';
