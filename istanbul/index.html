@@ -114,7 +114,13 @@
   .goal.done { background: #e9f6ee; border-color: #a9dcbc; color: var(--ok); }
   .bump { animation: bump .45s; }
   @keyframes bump { 40% { transform: scale(1.15); } }
-  .scorebar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .round-stats { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+  .goalrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .score-badge {
+    display: flex; align-items: baseline; gap: 5px; padding: 4px 11px; border-radius: 999px; font-size: 13px;
+    background: #f6f8fc; border: 1px solid var(--line); color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .score-badge b { font-size: 15px; font-weight: 700; color: var(--ink); }
   .shop { display: flex; align-items: center; gap: 10px; flex: none; }
   .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: rgba(22,35,63,.4); }
   .buy-icon svg { width: 64px; height: 64px; display: block; }
@@ -378,10 +384,12 @@
     </div>
     <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
     <hr class="hair">
-    <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
-    <div class="scorebar">
-      <div class="scoreline"><span>Очки <b id="score">0</b></span></div>
-      <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
+    <div class="goalrow">
+      <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
+      <div class="round-stats">
+        <span class="score-badge">Очки <b id="score">0</b></span>
+        <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
+      </div>
     </div>
   </section>
 
