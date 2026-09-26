@@ -276,7 +276,18 @@
   @keyframes halo { 50% { transform: scale(1.25); opacity: .55; } }
 
   /* ---------- Rules ---------- */
-  .rules { display: grid; gap: 10px; }
+  .rules { display: grid; gap: 4px; }
+  .rules-toggle {
+    display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 0;
+    background: none; border: 0; cursor: pointer; font: inherit; color: inherit; text-align: left;
+  }
+  .rules-toggle svg { width: 20px; height: 20px; color: var(--muted); transition: transform .3s ease; }
+  .rules-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .rules-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 8px; }
+  .rules-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
+  .rules-body.open { grid-template-rows: 1fr; }
+  .rules-inner { overflow: hidden; min-height: 0; display: grid; gap: 10px; }
+  .rules-body.open .rules-inner { padding-bottom: 4px; }
   .rules ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .rules li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; font-size: 14px; }
   .rules li svg { width: 40px; height: 40px; display: block; }
@@ -289,6 +300,7 @@
     .tile.hint .in, .tile.nazar .in svg, .moves.low b, .stop .halo { animation: none; }
     .tile.hint .in { outline: 2px dashed var(--gold); border-radius: 50%; }
     .gull { display: none; }
+    .rules-body, .rules-toggle svg { transition: none; }
   }
 </style>
 </head>
@@ -410,8 +422,14 @@
     <div class="route-scroll" id="more" hidden><ol id="route"></ol></div>
   </section>
 
-  <section class="rules" aria-labelledby="rulesTitle">
-    <h2 class="section-title" id="rulesTitle">Как играть</h2>
+  <section class="rules">
+    <h2 class="section-title">
+      <button class="rules-toggle" id="rulesToggle" type="button" aria-expanded="false" aria-controls="rulesBody">
+        Как играть
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </h2>
+    <div class="rules-body" id="rulesBody"><div class="rules-inner" inert>
     <ul>
       <li><span id="icoPiece"></span><span>Меняй местами соседние изразцы и собирай <b>3 в ряд</b>. Цель — набрать нужные достопримечательности, симиты и кошек, пока не кончились ходы.</span></li>
       <li><span id="icoGull"></span><span><b>4 в ряд</b> — чайка. Пролетает над строкой или столбцом и снимает всё на пути.</span></li>
@@ -424,6 +442,7 @@
       <li><span id="icoCart"></span><span><b>Тележки симитчи</b> нужно спустить в нижний ряд: убирай фишки под ними.</span></li>
     </ul>
     <p class="words">За каждую новую звезду дают 1 ₺, за первое задание дня — 2 ₺. Лиры тратятся на бонусы перед первым ходом. Оставшиеся ходы в конце уровня превращаются в салют из чаек. Похвала за серии по-турецки: <i>гюзель</i> — красиво, <i>харика</i> — чудесно, <i>машаллах</i> — браво, <i>мюкеммель</i> — идеально.</p>
+    </div></div>
   </section>
 </main>
 
@@ -1506,6 +1525,12 @@ function dailyDef(date) {
   }
   $('dailyBtn').addEventListener('click', () => { if (!busy) startDaily(); });
   $('lvlCaption').addEventListener('click', e => e.currentTarget.classList.toggle('open'));
+  $('rulesToggle').addEventListener('click', e => {
+    const open = e.currentTarget.getAttribute('aria-expanded') !== 'true';
+    e.currentTarget.setAttribute('aria-expanded', String(open));
+    $('rulesBody').classList.toggle('open', open);
+    $('rulesBody').firstElementChild.inert = !open;
+  });
 
   // ---------- Effects ----------
   function fx(className, style, html, ms) {
