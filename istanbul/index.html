@@ -95,7 +95,7 @@
   .goal svg { width: 30px; height: 30px; display: block; }
   .goal .gi { width: 30px; height: 30px; }
   .goal.done { background: #e9f6ee; border-color: #a9dcbc; color: var(--ok); }
-  .goal.bump { animation: bump .45s; }
+  .bump { animation: bump .45s; }
   @keyframes bump { 40% { transform: scale(1.15); } }
   .scoreline { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .scoreline b { color: var(--ink); font-weight: 800; }
@@ -160,6 +160,8 @@
     background: radial-gradient(circle, rgba(240,180,41,.75) 0, rgba(240,138,36,.35) 45%, transparent 70%);
     animation: burst .45s ease-out forwards; }
   @keyframes burst { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+  .wave.gold { border-color: rgba(240,180,41,.95); }
+  .tile.block { cursor: default; }
   .wave { position: absolute; width: 12.5%; height: 12.5%; border-radius: 50%; border: 4px solid rgba(31,79,191,.7);
     animation: wave .6s ease-out forwards; }
   @keyframes wave { from { transform: scale(.4); opacity: 1; } to { transform: scale(9); opacity: 0; } }
@@ -214,6 +216,49 @@
   .route-item:disabled { cursor: default; background: #f4f6fa; color: #9aa6bd; }
   .route-item:disabled .n { color: #9aa6bd; }
 
+  .boostbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .boosts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .boost {
+    display: flex; align-items: center; gap: 4px; padding: 3px 8px 3px 3px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); font-weight: 800; font-size: 13px;
+  }
+  .boost svg { width: 26px; height: 26px; display: block; }
+  .boost em { font-style: normal; font-size: 12px; color: var(--turq); }
+  .boost:disabled { opacity: .45; cursor: default; }
+  .boost.used { opacity: 1; background: #e9f6ee; border-color: #a9dcbc; }
+  .boost:focus-visible, .daily:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .wallet { display: flex; align-items: center; gap: 5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .wallet .coin { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: #5a3d00; font-size: 13px; }
+  .boost-hint { margin: 0; flex: 1 1 8em; font-size: 12px; line-height: 1.3; color: var(--muted); }
+
+  .daily {
+    display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; width: 100%; text-align: left;
+    padding: 10px 12px; cursor: pointer; border-radius: 14px; border: 1px solid var(--line);
+    background: linear-gradient(135deg, #ffffff, #edf3ff);
+  }
+  .daily svg { width: 40px; height: 40px; display: block; }
+  .daily b { display: block; font-size: 15px; }
+  .daily .d { font-size: 13px; color: var(--muted); }
+  .daily em { font-style: normal; font-size: 12px; font-weight: 800; color: var(--turq); text-align: right; max-width: 14ch; }
+  .daily.cur { border-color: var(--cobalt); box-shadow: inset 0 0 0 1px var(--cobalt); }
+  .map { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #f6f9fd; }
+  .map svg { display: block; width: 100%; height: auto; }
+  .water { fill: #d3e5f7; stroke: #b7d0ec; stroke-width: 1.5; }
+  .sea { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 8px; letter-spacing: .22em; fill: #7d9cc4; text-anchor: middle; }
+  .land { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 9px; letter-spacing: .28em; fill: #b3bfd3; text-anchor: middle; }
+  .stop { cursor: pointer; outline: none; }
+  .stop .dot { fill: var(--cobalt); stroke: #fff; stroke-width: 2.5; }
+  .stop .num { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 10px; fill: #fff; pointer-events: none; }
+  .stop .nm { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 10px; fill: var(--ink); paint-order: stroke; stroke: #f6f9fd; stroke-width: 3px; }
+  .stop .st { font-size: 9px; letter-spacing: 1px; fill: #cfd6e2; paint-order: stroke; stroke: #f6f9fd; stroke-width: 3px; }
+  .stop .st .on { fill: var(--gold); }
+  .stop.locked { cursor: default; }
+  .stop.locked .dot { fill: #c3ccdb; }
+  .stop.locked .nm { fill: #9aa6bd; }
+  .stop .halo { fill: rgba(240,180,41,.4); transform-box: fill-box; transform-origin: center; animation: halo 1.6s ease-in-out infinite; }
+  .stop:focus-visible .dot { stroke: var(--gold); stroke-width: 4; }
+  @keyframes halo { 50% { transform: scale(1.25); opacity: .55; } }
+
   /* ---------- Rules ---------- */
   .rules { display: grid; gap: 10px; }
   .rules ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -225,7 +270,7 @@
   .foot { display: flex; justify-content: flex-end; }
 
   @media (prefers-reduced-motion: reduce) {
-    .tile.hint .in, .tile.nazar .in svg, .moves.low b { animation: none; }
+    .tile.hint .in, .tile.nazar .in svg, .moves.low b, .stop .halo { animation: none; }
     .tile.hint .in { outline: 2px dashed var(--gold); border-radius: 50%; }
     .gull { display: none; }
   }
@@ -298,7 +343,12 @@
     </div>
     <p class="caption" id="lvlCaption"></p>
     <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
-    <div class="scoreline"><span>Очки <b id="score">0</b></span><span>Рекорд уровня <b id="best">—</b></span></div>
+    <div class="scoreline"><span>Очки <b id="score">0</b></span><span><span id="bestLabel">Рекорд уровня</span> <b id="best">—</b></span></div>
+    <div class="boostbar">
+      <div class="boosts" id="boosts" aria-label="Бонусы"></div>
+      <p class="boost-hint" id="boostHint"></p>
+      <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
+    </div>
   </section>
 
   <div class="frame">
@@ -322,7 +372,25 @@
 
   <section class="route" aria-labelledby="routeTitle">
     <h2 class="section-title" id="routeTitle">Маршрут</h2>
-    <div class="route-scroll"><ol id="route"></ol></div>
+    <button class="daily" id="dailyBtn" type="button">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="6" width="34" height="31" rx="6" fill="#fff" stroke="#2350b8" stroke-width="2.5"/><path d="M3 15 H37" stroke="#2350b8" stroke-width="2.5"/><path d="M12 3 V9 M28 3 V9" stroke="#2350b8" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="26" r="7.5" fill="#1f4fbf"/><circle cx="20" cy="26" r="5" fill="#fff"/><circle cx="20" cy="26" r="3.4" fill="#6cc0f2"/><circle cx="20" cy="26" r="1.7" fill="#10204a"/></svg>
+      <span><b>Задание дня</b><span class="d" id="dailyDate"></span></span>
+      <em id="dailyBest"></em>
+    </button>
+    <div class="map">
+      <svg viewBox="0 0 360 320" role="group" aria-label="Карта маршрута по Стамбулу">
+        <rect width="360" height="320" fill="#f6f9fd"/>
+        <text x="60" y="40" class="land">ЕВРОПА</text><text x="306" y="40" class="land">АЗИЯ</text>
+        <path class="water" d="M234 0 C226 30 232 70 224 110 C216 150 222 190 210 226 C200 252 204 268 196 282 C150 286 60 284 0 290 V320 H360 V286 C320 282 280 282 262 272 C248 262 250 236 252 210 C254 180 256 150 258 120 C262 90 262 50 272 0 Z"/>
+        <path class="water" d="M212 226 C185 216 140 200 100 186 C75 177 55 168 38 166 L36 174 C56 178 78 188 104 198 C140 212 180 230 206 246 Z"/>
+        <g stroke="#8fa9c9" stroke-width="2" stroke-linecap="round"><line x1="222" y1="99" x2="263" y2="95"/><line x1="231" y1="90" x2="231" y2="104"/><line x1="254" y1="86" x2="254" y2="100"/></g>
+        <text x="246" y="170" transform="rotate(-82 246 170)" class="sea">БОСФОР</text>
+        <text x="62" y="165" transform="rotate(21 62 165)" class="sea">ЗОЛОТОЙ РОГ</text>
+        <text x="74" y="309" class="sea">МРАМОРНОЕ МОРЕ</text>
+        <g id="stops"></g>
+      </svg>
+    </div>
+    <div class="route-scroll" id="more" hidden><ol id="route"></ol></div>
   </section>
 
   <section class="rules" aria-labelledby="rulesTitle">
@@ -332,9 +400,13 @@
       <li><span id="icoGull"></span><span><b>4 в ряд</b> — чайка. Пролетает над строкой или столбцом и снимает всё на пути.</span></li>
       <li><span id="icoFerry"></span><span><b>Уголок</b> (буквы Г или Т) — вапур, так в Стамбуле зовут паром. Даёт гудок и снимает квадрат 3×3.</span></li>
       <li><span id="icoNazar"></span><span><b>5 в ряд</b> — назар. Поменяй его с любым изразцом, и уйдут все такого же цвета. Два назара очищают всё поле.</span></li>
+      <li><span id="icoCombo"></span><span><b>Две особые фишки вместе</b> — комбо. Две чайки дают крест, чайка с вапуром — три строки и три столбца, два вапура — квадрат 5×5, а назар превращает весь цвет в такие же особые фишки.</span></li>
       <li><span id="icoDust"></span><span><b>Пыльные клетки</b> — старые изразцы. Собери совпадение прямо на них, чтобы отреставрировать. Тёмные чистятся дважды.</span></li>
+      <li><span id="icoSleep"></span><span><b>Спящие кошки</b> не двигаются. Собери совпадение рядом, и кошка проснётся и уйдёт.</span></li>
+      <li><span id="icoTea"></span><span><b>Ящики с чаем</b> тоже стоят на месте и разбиваются за два удара.</span></li>
+      <li><span id="icoCart"></span><span><b>Тележки симитчи</b> нужно спустить в нижний ряд: убирай фишки под ними.</span></li>
     </ul>
-    <p class="words">Две особые фишки, поменянные друг с другом, срабатывают обе. Похвала за серии по-турецки: <i>гюзель</i> — красиво, <i>харика</i> — чудесно, <i>машаллах</i> — браво, <i>мюкеммель</i> — идеально.</p>
+    <p class="words">За каждую новую звезду дают 1 ₺, за первое задание дня — 2 ₺. Лиры тратятся на бонусы перед первым ходом. Оставшиеся ходы в конце уровня превращаются в салют из чаек. Похвала за серии по-турецки: <i>гюзель</i> — красиво, <i>харика</i> — чудесно, <i>машаллах</i> — браво, <i>мюкеммель</i> — идеально.</p>
     <div class="foot"><button class="btn ghost" id="restart" type="button">Начать уровень заново</button></div>
   </section>
 </main>
@@ -344,7 +416,7 @@
 // Pure match-3 logic: no DOM. The page animates the steps it returns;
 // the tuning script runs the same code headless.
 function createEngine(opts) {
-  const N = (opts && opts.size) || 8;
+  const N = 8;
   const KINDS = (opts && opts.kinds) || [0, 1, 2, 3, 4, 5];
   const rng = (opts && opts.rng) || Math.random;
   let grid = [], dust = [], nextId = 1;
@@ -353,7 +425,15 @@ function createEngine(opts) {
   const inside = (r, c) => r >= 0 && r < N && c >= 0 && c < N;
   const rnd = n => Math.floor(rng() * n);
   const randomKind = () => KINDS[rnd(KINDS.length)];
-  const newTile = (type, special) => ({ id: nextId++, type, special: special || null });
+  const newTile = (type, special, hp) => ({ id: nextId++, type, special: special || null, hp: hp || 0 });
+  const POWER = { row: 1, col: 1, bomb: 1, nazar: 1 };
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  // Sleeping cats and tea crates (type -2) stay put until a match next to them;
+  // simit carts (type -3) only leave the board through the bottom row.
+  const isPower = t => !!(t && POWER[t.special]);
+  const isBlocker = t => !!t && t.type === -2;
+  const isCart = t => !!t && t.type === -3;
+  const isLine = t => t && (t.special === 'row' || t.special === 'col');
 
   function findRuns(g) {
     const runs = [];
@@ -382,9 +462,10 @@ function createEngine(opts) {
 
   function validSwap(a, b) {
     const A = grid[a[0]][a[1]], B = grid[b[0]][b[1]];
-    if (!A || !B) return false;
-    if (A.special === 'nazar' || B.special === 'nazar') return true;
-    if (A.special && B.special) return true;
+    if (!A || !B || isBlocker(A) || isBlocker(B)) return false;
+    if (isCart(A) && isCart(B)) return false;
+    if (A.special === 'nazar' || B.special === 'nazar') return !isCart(A) && !isCart(B);
+    if (isPower(A) && isPower(B)) return true;
     grid[a[0]][a[1]] = B; grid[b[0]][b[1]] = A;
     const ok = findRuns(grid).length > 0;
     grid[a[0]][a[1]] = A; grid[b[0]][b[1]] = B;
@@ -411,20 +492,25 @@ function createEngine(opts) {
   function mostCommonType() {
     const count = {};
     for (const row of grid) for (const t of row) if (t && t.type >= 0) count[t.type] = (count[t.type] || 0) + 1;
-    return Number(Object.keys(count).reduce((a, b) => (count[b] > count[a] ? b : a)));
+    const keys = Object.keys(count);
+    return keys.length ? Number(keys.reduce((a, b) => (count[b] > count[a] ? b : a))) : -1;
   }
 
-  // Fire every special caught in the clear set; the set grows as effects chain.
-  function expand(clear, colorHint) {
-    const queue = [...clear.keys()], fired = new Set(), effects = [];
+  // Clear the seed cells and fire every special caught on the way; blockers
+  // in the blast take a hit instead, carts ride it out.
+  function blast(seeds, colorHint) {
+    const clear = new Map(), hits = new Set(), effects = [], queue = [], fired = new Set();
     const push = (r, c) => {
       if (!inside(r, c) || !grid[r][c]) return;
-      const k = key(r, c);
+      const t = grid[r][c], k = key(r, c);
+      if (isBlocker(t)) { hits.add(k); return; }
+      if (isCart(t)) return;
       if (!clear.has(k)) { clear.set(k, [r, c]); queue.push(k); }
     };
+    seeds.forEach(([r, c]) => push(r, c));
     while (queue.length) {
       const k = queue.shift(), r = Math.floor(k / N), c = k % N, t = grid[r][c];
-      if (!t || !t.special || fired.has(k)) continue;
+      if (!t || !isPower(t) || fired.has(k)) continue;
       fired.add(k);
       if (t.special === 'row') {
         for (let cc = 0; cc < N; cc++) push(r, cc);
@@ -434,17 +520,17 @@ function createEngine(opts) {
         effects.push({ kind: 'col', r, c });
       } else if (t.special === 'bomb') {
         for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) push(r + dr, c + dc);
-        effects.push({ kind: 'bomb', r, c });
+        effects.push({ kind: 'bomb', r, c, size: 3 });
       } else if (t.special === 'nazar') {
         const color = colorHint != null ? colorHint : mostCommonType();
         colorHint = null;
-        for (let rr = 0; rr < N; rr++) for (let cc = 0; cc < N; cc++) {
+        if (color >= 0) for (let rr = 0; rr < N; rr++) for (let cc = 0; cc < N; cc++) {
           if (grid[rr][cc] && grid[rr][cc].type === color) push(rr, cc);
         }
         effects.push({ kind: 'nazar', r, c, color });
       }
     }
-    return effects;
+    return { clear, hits, effects };
   }
 
   function gravity() {
@@ -461,44 +547,78 @@ function createEngine(opts) {
       for (let r = w; r >= 0; r--) {
         const t = newTile(randomKind());
         grid[r][c] = t;
-        spawns.push({ id: t.id, type: t.type, special: null, r, c, from: r - gap });
+        spawns.push({ id: t.id, type: t.type, special: null, hp: 0, r, c, from: r - gap });
       }
     }
     return { falls, spawns };
   }
 
-  function step(clear, creates, cascade, colorHint) {
-    const effects = expand(clear, colorHint);
+  const describe = (t, r, c) => ({ id: t.id, r, c, type: t.type, special: t.special, hp: t.hp });
+
+  function step(seeds, creates, cascade, colorHint, preEffects) {
+    const { clear, hits, effects } = blast(seeds, colorHint);
+    // A match or blast next to a sleeping cat or tea crate wakes / cracks it.
+    for (const [r, c] of clear.values()) for (const [dr, dc] of DIRS) {
+      const rr = r + dr, cc = c + dc;
+      if (inside(rr, cc) && isBlocker(grid[rr][cc])) hits.add(key(rr, cc));
+    }
     const dustHits = [];
-    for (const k of new Set([...clear.keys(), ...creates.keys()])) {
+    for (const k of clear.keys()) {
       const r = Math.floor(k / N), c = k % N;
       if (dust[r][c] > 0) { dust[r][c]--; dustHits.push({ r, c, level: dust[r][c] }); }
     }
     for (const k of creates.keys()) clear.delete(k);
-    const cleared = [], collected = {};
+    const cleared = [], collected = {}, freed = {}, damaged = [];
     for (const [r, c] of clear.values()) {
       const t = grid[r][c];
-      cleared.push({ id: t.id, r, c, type: t.type, special: t.special });
+      cleared.push(describe(t, r, c));
       if (t.type >= 0) collected[t.type] = (collected[t.type] || 0) + 1;
       grid[r][c] = null;
+    }
+    for (const k of hits) {
+      const r = Math.floor(k / N), c = k % N, t = grid[r][c];
+      t.hp--;
+      if (t.hp <= 0) {
+        cleared.push(describe(t, r, c));
+        freed[t.special] = (freed[t.special] || 0) + 1;
+        grid[r][c] = null;
+      } else {
+        damaged.push(describe(t, r, c));
+      }
     }
     const upgraded = [];
     for (const [k, cr] of creates) {
       const r = Math.floor(k / N), c = k % N, t = grid[r][c];
       t.special = cr.special; t.type = cr.type;
-      upgraded.push({ id: t.id, r, c, type: t.type, special: t.special });
+      upgraded.push(describe(t, r, c));
     }
-    const score = cleared.length * 10 * cascade + upgraded.length * 30 + dustHits.length * 20;
+    const freedCount = Object.values(freed).reduce((a, b) => a + b, 0);
+    const score = (cleared.length - freedCount) * 10 * cascade + freedCount * 40 + damaged.length * 20 + upgraded.length * 30 + dustHits.length * 20;
     const { falls, spawns } = gravity();
-    return { cascade, cleared, upgraded, effects, dust: dustHits, falls, spawns, score, collected };
+    return { cascade, cleared, upgraded, damaged, effects: (preEffects || []).concat(effects), dust: dustHits, falls, spawns, score, collected, freed };
+  }
+
+  // Carts that reached the bottom row are delivered.
+  function deliver(cascade) {
+    const cleared = [];
+    for (let c = 0; c < N; c++) {
+      const t = grid[N - 1][c];
+      if (isCart(t)) { cleared.push(describe(t, N - 1, c)); grid[N - 1][c] = null; }
+    }
+    if (!cleared.length) return null;
+    const { falls, spawns } = gravity();
+    return {
+      cascade, cleared, upgraded: [], damaged: [], dust: [], falls, spawns, collected: {},
+      effects: cleared.map(t => ({ kind: 'deliver', r: t.r, c: t.c })),
+      score: cleared.length * 100, freed: { cart: cleared.length },
+    };
   }
 
   function planRuns(runs, moved) {
-    const clear = new Map(), cellRuns = new Map(), creates = new Map(), used = new Set();
+    const clear = [], cellRuns = new Map(), creates = new Map(), used = new Set();
     for (const run of runs) for (const [r, c] of run.cells) {
       const k = key(r, c);
-      clear.set(k, [r, c]);
-      if (!cellRuns.has(k)) cellRuns.set(k, []);
+      if (!cellRuns.has(k)) { cellRuns.set(k, []); clear.push([r, c]); }
       cellRuns.get(k).push(run);
     }
     const pick = run => {
@@ -524,8 +644,10 @@ function createEngine(opts) {
     return { clear, creates };
   }
 
-  function cascade(steps, moved, level) {
+  function settle(steps, moved, level) {
     while (true) {
+      let d;
+      while ((d = deliver(level))) steps.push(d);
       const runs = findRuns(grid);
       if (!runs.length) return;
       level++;
@@ -537,12 +659,67 @@ function createEngine(opts) {
 
   function reshuffle() {
     const tiles = [];
-    for (const row of grid) for (const t of row) if (t.special !== 'nazar') tiles.push(t);
+    for (const row of grid) for (const t of row) if (t.type >= 0) tiles.push(t);
     for (let tries = 0; tries < 500; tries++) {
       for (const t of tiles) t.type = randomKind();
       if (!findRuns(grid).length && findMove()) break;
     }
-    return tiles.map(t => ({ id: t.id, type: t.type, special: t.special }));
+    return tiles.map(t => ({ id: t.id, type: t.type, special: t.special, hp: t.hp }));
+  }
+
+  const square = (r, c, rad) => {
+    const cells = [];
+    for (let dr = -rad; dr <= rad; dr++) for (let dc = -rad; dc <= rad; dc++) cells.push([r + dr, c + dc]);
+    return cells;
+  };
+  const rowCells = r => Array.from({ length: N }, (_, c) => [r, c]);
+  const colCells = c => Array.from({ length: N }, (_, r) => [r, c]);
+
+  // Two specials swapped together make a stronger effect than either alone.
+  function combo(A, B, a, b) {
+    const [r, c] = b;
+    const nazA = A.special === 'nazar', nazB = B.special === 'nazar';
+    if (nazA && nazB) {
+      const all = [];
+      for (let rr = 0; rr < N; rr++) for (let cc = 0; cc < N; cc++) all.push([rr, cc]);
+      A.special = B.special = null;
+      return step(all, new Map(), 1, null, [{ kind: 'nazar', r, c }, { kind: 'nazar', r: a[0], c: a[1] }]);
+    }
+    if (nazA || nazB) {
+      const naz = nazA ? A : B, other = nazA ? B : A, nazPos = nazA ? b : a;
+      if (!isPower(other)) {
+        return step([nazPos], new Map(), 1, other.type);
+      }
+      // Every tile of that colour turns into the other special and goes off.
+      naz.special = null;
+      const seeds = [nazPos], upgraded = [];
+      for (let rr = 0; rr < N; rr++) for (let cc = 0; cc < N; cc++) {
+        const t = grid[rr][cc];
+        if (t && t.type === other.type) {
+          if (t !== other) t.special = other.special === 'bomb' ? 'bomb' : (rnd(2) ? 'row' : 'col');
+          upgraded.push(describe(t, rr, cc));
+          seeds.push([rr, cc]);
+        }
+      }
+      const s = step(seeds, new Map(), 1, null, [{ kind: 'nazar', r: nazPos[0], c: nazPos[1] }]);
+      s.charged = upgraded;
+      return s;
+    }
+    const lines = [A, B].filter(isLine).length, bombs = [A, B].filter(t => t.special === 'bomb').length;
+    A.special = B.special = null;
+    if (lines === 2) {
+      return step(rowCells(r).concat(colCells(c)), new Map(), 1, null, [{ kind: 'row', r, c }, { kind: 'col', r, c }]);
+    }
+    if (lines === 1 && bombs === 1) {
+      let seeds = [];
+      const fx = [];
+      for (let d = -1; d <= 1; d++) {
+        if (inside(r + d, 0)) { seeds = seeds.concat(rowCells(r + d)); fx.push({ kind: 'row', r: r + d, c }); }
+        if (inside(0, c + d)) { seeds = seeds.concat(colCells(c + d)); fx.push({ kind: 'col', r, c: c + d }); }
+      }
+      return step(seeds, new Map(), 1, null, fx);
+    }
+    return step(square(r, c, 2), new Map(), 1, null, [{ kind: 'bomb', r, c, size: 5 }]);
   }
 
   function swap(a, b) {
@@ -551,35 +728,48 @@ function createEngine(opts) {
     const A = grid[a[0]][a[1]], B = grid[b[0]][b[1]];
     grid[a[0]][a[1]] = B; grid[b[0]][b[1]] = A;
     const steps = [];
-    const nazA = A.special === 'nazar', nazB = B.special === 'nazar';
-    if (nazA || nazB) {
-      const clear = new Map();
-      let hint = null;
-      if (nazA && nazB) {
-        for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) clear.set(key(r, c), [r, c]);
-      } else {
-        const pos = nazA ? b : a;
-        clear.set(key(pos[0], pos[1]), pos);
-        hint = (nazA ? B : A).type;
-      }
-      steps.push(step(clear, new Map(), 1, hint));
-      cascade(steps, [], 1);
-    } else if (A.special && B.special) {
-      steps.push(step(new Map([[key(a[0], a[1]), a], [key(b[0], b[1]), b]]), new Map(), 1, null));
-      cascade(steps, [], 1);
+    if (A.special === 'nazar' || B.special === 'nazar' || (isPower(A) && isPower(B))) {
+      steps.push(combo(A, B, a, b));
+      settle(steps, [], 1);
     } else {
-      cascade(steps, [b, a], 0);
+      settle(steps, [b, a], 0);
     }
     const shuffle = findMove() ? null : reshuffle();
     return { valid: true, steps, shuffle };
   }
 
-  function init(layout) {
+  // End-of-level fireworks: leftover moves become seagulls that all take off.
+  function salute(count) {
+    const pool = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const t = grid[r][c];
+      if (t && t.type >= 0 && !t.special) pool.push([r, c]);
+    }
+    const marks = [], seeds = [];
+    for (let i = 0; i < count && pool.length; i++) {
+      const [r, c] = pool.splice(rnd(pool.length), 1)[0], t = grid[r][c];
+      t.special = rnd(2) ? 'row' : 'col';
+      marks.push(describe(t, r, c));
+      seeds.push([r, c]);
+    }
+    const steps = [];
+    if (seeds.length) {
+      steps.push(step(seeds, new Map(), 1, null));
+      settle(steps, [], 1);
+    }
+    return { marks, steps };
+  }
+
+  function init(layout, tiles) {
     for (let tries = 0; tries < 500; tries++) {
       grid = [];
       for (let r = 0; r < N; r++) {
         grid.push([]);
         for (let c = 0; c < N; c++) {
+          const ch = tiles && tiles[r] ? tiles[r][c] : '.';
+          if (ch === 'c') { grid[r].push(newTile(-2, 'cat', 1)); continue; }
+          if (ch === 't') { grid[r].push(newTile(-2, 'tea', 2)); continue; }
+          if (ch === 's') { grid[r].push(newTile(-3, 'cart')); continue; }
           let type;
           do { type = randomKind(); } while (
             (c >= 2 && grid[r][c - 1].type === type && grid[r][c - 2].type === type) ||
@@ -593,17 +783,35 @@ function createEngine(opts) {
       layout && layout[r] ? Number(layout[r][c]) || 0 : 0));
   }
 
-  // Score a move by what its first, predictable wave would clear.
+  // Give one special to a random plain tile (a pre-level boost).
+  function grant(special) {
+    const pool = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const t = grid[r][c];
+      if (t && t.type >= 0 && !t.special) pool.push([r, c]);
+    }
+    if (!pool.length) return null;
+    const [r, c] = pool[rnd(pool.length)], t = grid[r][c];
+    t.special = special === 'line' ? (rnd(2) ? 'row' : 'col') : special;
+    if (t.special === 'nazar') t.type = -1;
+    return describe(t, r, c);
+  }
+
+  // Score a move by what its first, predictable wave would do.
   function rate(a, b, wants) {
     const saved = { grid: grid.map(row => row.map(t => t && { ...t })), dust: dust.map(row => row.slice()), nextId };
     const res = swap(a, b);
     let value = 0;
     if (res.valid && res.steps.length) {
       const s = res.steps[0];
-      for (const t of s.cleared) value += t.type >= 0 && wants[t.type] ? 3 : 1;
-      value += s.dust.length * 4;
+      for (const t of s.cleared) value += t.type >= 0 && wants[t.type] ? 3 : t.type < -1 ? 6 : 1;
+      value += s.dust.length * 4 + s.damaged.length * 4;
       for (const u of s.upgraded) value += u.special === 'nazar' ? 14 : u.special === 'bomb' ? 9 : 6;
+      for (const d of res.steps) if (d.freed && d.freed.cart) value += 12 * d.freed.cart;
     }
+    // Moving a cart down a row is worth something on its own.
+    const A = saved.grid[a[0]][a[1]], B = saved.grid[b[0]][b[1]];
+    if (res.valid && ((isCart(A) && b[0] > a[0]) || (isCart(B) && a[0] > b[0]))) value += 2;
     grid = saved.grid; dust = saved.dust; nextId = saved.nextId;
     return value;
   }
@@ -623,17 +831,23 @@ function createEngine(opts) {
     return n;
   }
 
+  function obstacles() {
+    const n = { cat: 0, tea: 0, cart: 0 };
+    for (const row of grid) for (const t of row) if (t && t.type < -1) n[t.special]++;
+    return n;
+  }
+
   function snapshot() {
-    return { grid: grid.map(row => row.map(t => [t.type, t.special])), dust: dust.map(row => row.slice()) };
+    return { grid: grid.map(row => row.map(t => [t.type, t.special, t.hp])), dust: dust.map(row => row.slice()) };
   }
 
   function restore(snap) {
-    grid = snap.grid.map(row => row.map(([type, special]) => newTile(type, special)));
+    grid = snap.grid.map(row => row.map(([type, special, hp]) => newTile(type, special, hp)));
     dust = snap.dust.map(row => row.slice());
   }
 
   return {
-    N, KINDS, init, swap, findMove, allMoves, bestMove, rate, dustLeft, snapshot, restore,
+    N, KINDS, init, swap, salute, grant, findMove, allMoves, bestMove, rate, dustLeft, obstacles, snapshot, restore,
     get grid() { return grid; },
     get dust() { return dust; },
   };
@@ -642,6 +856,7 @@ function createEngine(opts) {
 
 // ==LEVELS==
 // Targets tuned by simulating a few hundred games per level with a greedy bot.
+// tiles: c = sleeping cat, t = tea crate (two hits), s = simit cart.
 const LEVELS = [
   { name: 'Султанахмет', caption: 'Айя-София и Голубая мечеть смотрят друг на друга через площадь, а между ними — лотки с симитами.', moves: 20,
     pieces: [0, 1, 2, 5, 6, 7], goals: { 0: 17, 1: 17 } },
@@ -660,9 +875,22 @@ const LEVELS = [
   { name: 'Балат', caption: 'Разноцветные дома у Золотого Рога, пыльные дворики и их хозяева — кошки.', moves: 24,
     pieces: [1, 3, 4, 5, 6, 7], goals: { 7: 25, 3: 25 },
     dust: ['........', '........', '..1111..', '.122221.', '.122221.', '..1111..', '........', '........'] },
-  { name: 'Весь Стамбул', caption: 'Финал маршрута: все достопримечательности сразу.', moves: 26,
-    pieces: [0, 1, 2, 3, 4, 5], goals: { 0: 20, 1: 20, 2: 20, 3: 20, 4: 20, 5: 20 },
+  { name: 'Весь Стамбул', caption: 'Финал первого круга: все достопримечательности сразу.', moves: 26,
+    pieces: [0, 1, 2, 3, 4, 5], goals: { 0: 21, 1: 21, 2: 21, 3: 21, 4: 21, 5: 21 },
     dust: ['........', '........', '........', '11111111', '11111111', '........', '........', '........'] },
+  { name: 'Кадыкёй', caption: 'На набережной Кадыкёя спят кошки. Собери совпадение рядом, чтобы разбудить.', moves: 21,
+    pieces: [0, 1, 2, 4, 5, 6], goals: { 6: 24 },
+    tiles: ['........', '.c....c.', '........', '...cc...', '........', '.c....c.', '........', '........'] },
+  { name: 'Каракёй', caption: 'У причала сгрузили ящики с чаем. Каждый нужно задеть дважды.', moves: 24,
+    pieces: [0, 2, 3, 5, 6, 7], goals: { 7: 18 },
+    tiles: ['........', '........', 'tt....tt', '........', '........', 'tt....tt', '........', '........'] },
+  { name: 'Мода', caption: 'Тележки симитчи спускаются к морю. Доведи каждую до нижнего ряда.', moves: 24,
+    pieces: [1, 2, 3, 4, 6, 7], goals: { 1: 12 },
+    tiles: ['..s..s..', '........', '........', '........', '........', '........', '........', '........'] },
+  { name: 'Бебек', caption: 'Всё сразу: кошки, чай, тележка и пыльная набережная.', moves: 28,
+    pieces: [0, 1, 3, 4, 5, 7], goals: { 3: 14 },
+    tiles: ['....s...', '........', 'c......c', '........', '...tt...', '........', '........', '........'],
+    dust: ['........', '........', '........', '........', '........', '........', '11111111', '........'] },
 ];
 const DUST_PATTERNS = [
   ['........', '.11..11.', '.11..11.', '........', '........', '.11..11.', '.11..11.', '........'],
@@ -670,23 +898,44 @@ const DUST_PATTERNS = [
   ['1......1', '.1....1.', '..1..1..', '...11...', '...11...', '..1..1..', '.1....1.', '1......1'],
   ['........', '11111111', '........', '........', '........', '........', '11111111', '........'],
 ];
-const DISTRICTS = ['Кадыкёй', 'Каракёй', 'Бебек', 'Фенер', 'Эюп', 'Арнавуткёй', 'Кузгунджук', 'Румелихисар', 'Мода', 'Джихангир'];
-function levelDef(n) {
-  if (n <= LEVELS.length) return LEVELS[n - 1];
-  let s = (n * 2654435761) >>> 0;
-  const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
-  const loop = n - LEVELS.length;
-  const kinds = 2 + (n % 2);
+// cost: goal pieces each pattern is worth (for 2 and 3 goal kinds); moves: extra moves it gets.
+const TILE_PATTERNS = [
+  { cost: [1, 2], rows: ['........', '.c....c.', '........', '........', '........', '........', '.c....c.', '........'] },
+  { cost: [0, 1], rows: ['........', '........', '..t..t..', '........', '........', '..t..t..', '........', '........'] },
+  { cost: [5, 8], moves: 3, rows: ['..s..s..', '........', '........', '........', '........', '........', '........', '........'] },
+];
+const DISTRICTS = ['Фенер', 'Эюп', 'Арнавуткёй', 'Кузгунджук', 'Румелихисар', 'Джихангир', 'Сарыер', 'Бейкоз', 'Нишанташи', 'Чукурджума'];
+
+function seededRand(seed) {
+  let s = seed >>> 0;
+  return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+}
+function randomLevel(rand, name, caption, harder) {
+  const kinds = rand() < 0.5 ? 2 : 3;
   const pool = [0, 1, 2, 3, 4, 5, 6, 7];
   for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  const dust = n % 3 === 0 ? DUST_PATTERNS[Math.floor(rand() * DUST_PATTERNS.length)] : null;
-  const count = (kinds === 2 ? 23 : 20) + Math.min(Math.floor(loop / 2), 4) - (dust ? (kinds === 2 ? 3 : 6) : 0);
-  const goals = {};
   const pieces = pool.slice(0, 6);
+  const roll = rand();
+  const dust = roll < 0.3 ? DUST_PATTERNS[Math.floor(rand() * DUST_PATTERNS.length)] : null;
+  const pattern = roll >= 0.3 && roll < 0.6 ? TILE_PATTERNS[Math.floor(rand() * TILE_PATTERNS.length)] : null;
+  const tiles = pattern && pattern.rows;
+  const count = (kinds === 2 ? 23 : 20) + harder - (dust ? (kinds === 2 ? 3 : 6) : 0) - (pattern ? pattern.cost[kinds - 2] : 0);
+  const goals = {};
   pieces.slice(0, kinds).forEach(t => { goals[t] = count; });
-  const lap = Math.ceil(loop / DISTRICTS.length);
+  return { name, caption, moves: (dust || tiles ? 25 : 24) + (pattern && pattern.moves || 0), pieces, goals, dust, tiles };
+}
+function levelDef(n) {
+  if (n <= LEVELS.length) return LEVELS[n - 1];
+  const loop = n - LEVELS.length, lap = Math.ceil(loop / DISTRICTS.length);
   const name = DISTRICTS[(loop - 1) % DISTRICTS.length] + (lap > 1 ? ' · круг ' + lap : '');
-  return { name, caption: 'Маршрут продолжается по новым кварталам, цели растут.', moves: dust ? 25 : 24, pieces, goals, dust };
+  return randomLevel(seededRand(n * 2654435761), name, 'Маршрут продолжается по новым кварталам, цели растут.', Math.min(Math.floor(loop / 2), 4));
+}
+// One board a day, the same for everyone: the date seeds both goals and tiles.
+function dailyDef(date) {
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const d = randomLevel(seededRand(seed * 2246822519), 'Задание дня', 'Одно поле на всех на сегодня. Попробуй набрать больше очков, чем вчера.', 2);
+  d.seed = seed;
+  return d;
 }
 // ==/LEVELS==
 
@@ -843,7 +1092,42 @@ function levelDef(n) {
     <circle cx="50" cy="50" r="11" fill="#10204a"/><circle cx="44" cy="43" r="4" fill="#fff" opacity=".9"/>
     <circle cx="50" cy="50" r="46" fill="none" stroke="#f0b429" stroke-width="3"/></svg>`;
 
-  function pieceSVG(type, special) {
+  // Obstacles are drawn as objects, not medallions, so they read as "not a piece".
+  const OBSTACLES = {
+    cat: () => `<svg viewBox="0 0 100 100" aria-hidden="true">
+      <rect x="7" y="34" width="86" height="54" rx="20" fill="#d6453a"/><rect x="7" y="34" width="86" height="54" rx="20" fill="url(#gloss)"/>
+      <path d="M16 80 H84" stroke="#f0b429" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 6"/>
+      <path d="M80 62 C92 74 72 82 56 74" fill="none" stroke="#8a93a6" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="54" cy="58" rx="28" ry="16" fill="#8a93a6"/>
+      <path d="M50 46 q4 12 0 24 M62 45 q4 13 0 26" stroke="#6f7890" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M19 46 L21 33 L29 41Z M33 41 L39 32 L41 45Z" fill="#8a93a6"/>
+      <circle cx="30" cy="52" r="13" fill="#8a93a6"/>
+      <path d="M23 52 q3 2.5 6 0 M32 52 q3 2.5 6 0" stroke="#16233f" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M28.5 57 h3 l-1.5 1.8z" fill="#e97897"/>
+      <path d="M64 22 h8 l-8 9 h8 M78 10 h6 l-6 7 h6" fill="none" stroke="#2350b8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    tea: hp => `<svg viewBox="0 0 100 100" aria-hidden="true">
+      <rect x="11" y="13" width="78" height="74" rx="7" fill="#c0834a"/><rect x="11" y="13" width="78" height="74" rx="7" fill="url(#gloss)"/>
+      <path d="M13 37 H87 M13 63 H87" stroke="#8d5a2b" stroke-width="3"/>
+      <rect x="11" y="13" width="78" height="74" rx="7" fill="none" stroke="#7a4a22" stroke-width="4"/>
+      <rect x="27" y="39" width="46" height="22" rx="4" fill="#fff"/>
+      <text x="50" y="55.5" text-anchor="middle" font-family="Nunito, Arial, sans-serif" font-weight="800" font-size="14" fill="#d6453a">ÇAY</text>
+      ${hp < 2 ? '<path d="M18 18 L33 33 L27 44 M83 82 L68 67 L74 56 M60 16 L55 28" fill="none" stroke="#3d2410" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' : ''}
+    </svg>`,
+    cart: () => `<svg viewBox="0 0 100 100" aria-hidden="true">
+      <rect x="18" y="20" width="64" height="26" rx="4" fill="#dcefff" stroke="#fff" stroke-width="2"/>
+      <g fill="none" stroke="#c98a45" stroke-width="4.5"><circle cx="33" cy="33" r="6.5"/><circle cx="50" cy="33" r="6.5"/><circle cx="67" cy="33" r="6.5"/></g>
+      <path d="M12 46 H88 L84 72 H16 Z" fill="#d6453a"/><path d="M12 46 H88 L84 72 H16 Z" fill="url(#gloss)"/>
+      <path d="M22 56 H78" stroke="#f0b429" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="30" cy="80" r="8" fill="#16233f"/><circle cx="70" cy="80" r="8" fill="#16233f"/>
+      <circle cx="30" cy="80" r="2.5" fill="#fff"/><circle cx="70" cy="80" r="2.5" fill="#fff"/>
+      <g transform="translate(74 4)"><circle cx="12" cy="12" r="12" fill="#2350b8"/><path d="M12 5 V18 M6.5 13 L12 18.5 L17.5 13" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </svg>`,
+  };
+  const OBSTACLE_NAMES = { cat: 'Спящие кошки', tea: 'Ящики с чаем', cart: 'Тележки симитчи' };
+
+  function pieceSVG(type, special, hp) {
+    if (type < -1) return OBSTACLES[special](hp);
     if (special === 'nazar') return NAZAR;
     const p = PIECES[type];
     return `<svg viewBox="0 0 100 100" aria-hidden="true">
@@ -880,6 +1164,10 @@ function levelDef(n) {
   $('icoFerry').innerHTML = pieceSVG(6, 'bomb');
   $('icoNazar').innerHTML = NAZAR;
   $('icoDust').innerHTML = cellIcon('dust2');
+  $('icoCombo').innerHTML = pieceSVG(4, 'col');
+  $('icoSleep').innerHTML = OBSTACLES.cat();
+  $('icoTea').innerHTML = OBSTACLES.tea(2);
+  $('icoCart').innerHTML = OBSTACLES.cart();
 
   // ---------- Sound: tiny WebAudio synth, notes from the Hicaz makam ----------
   const sfx = (() => {
@@ -946,6 +1234,8 @@ function levelDef(n) {
       bomb() { tone(110, 0.38, { type: 'triangle', gain: 0.24 }); tone(146.8, 0.34, { type: 'sawtooth', gain: 0.035 }); noise(0.2, { gain: 0.04, from: 300, to: 200, q: 0.7 }); },
       nazar() { [7, 9, 11, 12, 14].forEach((i, k) => tone(note(i), 0.2, { gain: 0.08, at: k * 0.05 })); },
       clink() { tone(1760, 0.09, { gain: 0.05 }); tone(2637, 0.07, { gain: 0.03, at: 0.02 }); },
+      meow() { tone(640, 0.24, { type: 'triangle', gain: 0.1, to: 880 }); tone(880, 0.2, { type: 'triangle', gain: 0.07, to: 520, at: 0.18 }); },
+      crack() { noise(0.12, { gain: 0.12, from: 1800, to: 900, q: 0.8 }); },
       goal() { tone(note(7), 0.14, { type: 'triangle', gain: 0.14 }); tone(note(11), 0.24, { type: 'triangle', gain: 0.14, at: 0.1 }); },
       win() { [0, 1, 2, 3, 4, 7].forEach((i, k) => tone(note(i + 7), 0.24, { type: 'triangle', gain: 0.15, at: k * 0.11 })); },
       lose() { [4, 3, 2, 1, 0].forEach((i, k) => tone(note(i + 3), 0.28, { type: 'triangle', gain: 0.11, at: k * 0.14 })); },
@@ -987,9 +1277,14 @@ function levelDef(n) {
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => sfx.unlock(), { passive: true }));
 
   // ---------- Game state ----------
-  let engine = null, level = 1, def = null, movesLeft = 0, need = {}, score = 0;
-  let busy = false, over = false, sel = null, hintTimer = null, kcur = [3, 3];
+  let engine = null, level = 1, mode = 'route', def = null, movesLeft = 0, need = {}, score = 0;
+  let busy = false, over = false, sel = null, hintTimer = null, kcur = [3, 3], moved = false, boosted = {};
   const els = new Map();
+  if (progress.coins == null) progress.coins = 3 + Object.values(progress.stars).reduce((a, b) => a + b, 0);
+  progress.daily = progress.daily || {};
+  const saveProgress = () => store.set('izrazcy-progress', progress);
+  const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  const today = () => { const d = new Date(); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 
   function setPos(el, r, c, instant) {
     if (instant) el.style.transition = 'none';
@@ -998,17 +1293,17 @@ function levelDef(n) {
   }
   function makeTile(t, r, c, fromRow) {
     const el = document.createElement('div');
-    el.className = 'tile' + (t.special === 'nazar' ? ' nazar' : '');
-    el.innerHTML = '<div class="in">' + pieceSVG(t.type, t.special) + '</div>';
+    el.className = 'tile' + (t.special === 'nazar' ? ' nazar' : '') + (t.type < -1 ? ' block' : '');
+    el.innerHTML = '<div class="in">' + pieceSVG(t.type, t.special, t.hp) + '</div>';
     tilesEl.appendChild(el);
     setPos(el, fromRow == null ? r : fromRow, c, true);
     els.set(t.id, el);
     return el;
   }
-  function paintTile(id, type, special) {
+  function paintTile(id, type, special, hp) {
     const el = els.get(id);
     if (!el) return;
-    el.firstChild.innerHTML = pieceSVG(type, special);
+    el.firstChild.innerHTML = pieceSVG(type, special, hp);
     el.classList.toggle('nazar', special === 'nazar');
   }
   const pulse = (el, cls, ms) => { el.classList.remove(cls); el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); };
@@ -1048,53 +1343,137 @@ function levelDef(n) {
   function renderGoals() {
     const ul = $('goals');
     ul.innerHTML = '';
-    for (const t of Object.keys(def.goals)) {
+    const add = (type, title, icon) => {
       const li = document.createElement('li');
       li.className = 'goal';
-      li.dataset.type = t;
-      li.title = PIECES[t].name;
-      li.innerHTML = `<span class="gi">${pieceSVG(Number(t), null)}</span><b></b>`;
+      li.dataset.type = type;
+      li.title = title;
+      li.innerHTML = `<span class="gi">${icon}</span><b></b>`;
       ul.appendChild(li);
-    }
-    if (def.dust) {
-      const li = document.createElement('li');
-      li.className = 'goal';
-      li.dataset.type = 'dust';
-      li.title = 'Пыльные клетки';
-      li.innerHTML = `<span class="gi">${cellIcon('dust1')}</span><b></b>`;
-      ul.appendChild(li);
-    }
+    };
+    for (const t of Object.keys(def.goals)) add(t, PIECES[t].name, pieceSVG(Number(t), null));
+    const o = engine.obstacles();
+    for (const k of ['cat', 'tea', 'cart']) if (o[k]) add(k, OBSTACLE_NAMES[k], OBSTACLES[k](2));
+    if (def.dust) add('dust', 'Пыльные клетки', cellIcon('dust1'));
+  }
+  function goalLeft(type) {
+    if (type === 'dust') return engine.dustLeft();
+    if (type === 'cat' || type === 'tea' || type === 'cart') return engine.obstacles()[type];
+    return Math.max(0, need[type]);
   }
   function goalsDone() {
-    return Object.values(need).every(v => v <= 0) && engine.dustLeft() === 0;
+    const o = engine.obstacles();
+    return Object.values(need).every(v => v <= 0) && engine.dustLeft() === 0 && o.cat + o.tea + o.cart === 0;
   }
   function hud() {
-    $('lvlNum').textContent = 'Уровень ' + level;
+    $('lvlNum').textContent = mode === 'daily' ? 'Задание дня · ' + today() : 'Уровень ' + level;
     $('lvlName').textContent = def.name;
     $('lvlCaption').textContent = def.caption;
     $('moves').textContent = movesLeft;
     $('movesWord').textContent = plural(movesLeft, 'ход', 'хода', 'ходов');
     $('movesBox').classList.toggle('low', movesLeft <= 5 && !over);
     $('score').textContent = score;
-    $('best').textContent = progress.best[level] || '—';
+    const best = mode === 'daily' ? progress.daily[def.seed] : progress.best[level];
+    $('bestLabel').textContent = mode === 'daily' ? 'Рекорд дня' : 'Рекорд уровня';
+    $('best').textContent = best || '—';
     for (const li of $('goals').children) {
-      const left = li.dataset.type === 'dust' ? engine.dustLeft() : Math.max(0, need[li.dataset.type]);
+      const left = goalLeft(li.dataset.type);
       li.querySelector('b').textContent = left > 0 ? left : '✓';
       li.classList.toggle('done', left <= 0);
       li.setAttribute('aria-label', `${li.title}: ${left > 0 ? 'осталось ' + left : 'готово'}`);
     }
+    renderBoosts();
   }
 
+  // ---------- Boosts, paid with lira earned for stars ----------
+  const BOOSTS = [
+    { id: 'moves', label: '+3 хода', cost: 2, icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#2350b8"/><text x="20" y="26" text-anchor="middle" font-family="Nunito, Arial, sans-serif" font-weight="800" font-size="16" fill="#fff">+3</text></svg>' },
+    { id: 'line', label: 'Чайка', cost: 2, icon: '' },
+    { id: 'nazar', label: 'Назар', cost: 4, icon: '' },
+  ];
+  function renderBoosts() {
+    $('coins').textContent = progress.coins;
+    const box = $('boosts');
+    if (!box.children.length) {
+      BOOSTS[1].icon = pieceSVG(5, 'row');
+      BOOSTS[2].icon = NAZAR;
+      for (const b of BOOSTS) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'boost';
+        btn.dataset.id = b.id;
+        btn.title = `${b.label} — ${b.cost} ₺`;
+        btn.setAttribute('aria-label', btn.title);
+        btn.innerHTML = `${b.icon}<em>${b.cost} ₺</em>`;
+        btn.addEventListener('click', () => useBoost(b));
+        box.appendChild(btn);
+      }
+    }
+    for (const btn of box.children) {
+      const b = BOOSTS.find(x => x.id === btn.dataset.id);
+      btn.disabled = moved || over || busy || boosted[b.id] || progress.coins < b.cost;
+      btn.classList.toggle('used', !!boosted[b.id]);
+    }
+    $('boostHint').textContent = moved || over ? 'Бонусы — только до первого хода' : '+3 хода · чайка · назар — до первого хода';
+  }
+  function useBoost(b) {
+    if (moved || over || busy || boosted[b.id] || progress.coins < b.cost) return;
+    progress.coins -= b.cost;
+    boosted[b.id] = true;
+    saveProgress();
+    if (b.id === 'moves') {
+      movesLeft += 3;
+      pulse($('movesBox'), 'bump', 460);
+    } else {
+      const u = engine.grant(b.id);
+      if (u) {
+        paintTile(u.id, u.type, u.special, u.hp);
+        const el = els.get(u.id);
+        if (el) pulse(el, 'born', 450);
+      }
+    }
+    sfx.special();
+    haptic(15);
+    hud();
+  }
+
+  // ---------- Route map ----------
+  // [x, y, side the label goes on]
+  const STOPS = {
+    1: [172, 262, 'l'], 2: [178, 198, 'l'], 3: [292, 212, 'r'], 4: [208, 104, 'l'], 5: [140, 230, 'l'], 6: [204, 152, 'l'],
+    7: [72, 200, 'r'], 8: [226, 302, 'l'], 9: [292, 256, 'r'], 10: [200, 210, 'r'], 11: [322, 294, 'l'], 12: [214, 52, 'l'],
+  };
   function renderRoute() {
-    const ol = $('route');
+    const g = $('stops');
+    let html = '';
+    for (const n of Object.keys(STOPS).map(Number)) {
+      const [x, y, side] = STOPS[n], open = n <= progress.unlocked, cur = mode === 'route' && n === level, st = progress.stars[n] || 0;
+      const label = side === 'l' ? 'end' : 'start', lx = side === 'l' ? x - 15 : x + 15;
+      html += `<g class="stop${open ? '' : ' locked'}${cur ? ' cur' : ''}" data-n="${n}" tabindex="${open ? 0 : -1}" role="button"
+        aria-label="Уровень ${n}, ${levelDef(n).name}${open ? ', звёзд: ' + st : ', закрыт'}">
+        ${cur ? `<circle cx="${x}" cy="${y}" r="17" class="halo"/>` : ''}
+        <circle cx="${x}" cy="${y}" r="11" class="dot"/>
+        <text x="${x}" y="${y + 4}" text-anchor="middle" class="num">${n}</text>
+        <text x="${lx}" y="${y - 1}" text-anchor="${label}" class="nm">${levelDef(n).name}</text>
+        <text x="${lx}" y="${y + 11}" text-anchor="${label}" class="st"><tspan class="on">${'★'.repeat(st)}</tspan>${'★'.repeat(3 - st)}</text>
+      </g>`;
+    }
+    g.innerHTML = html;
+    for (const el of g.querySelectorAll('.stop:not(.locked)')) {
+      const go = () => { if (!busy) startLevel(Number(el.dataset.n)); };
+      el.addEventListener('click', go);
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    }
+    // Past the map: the generated levels, as a strip.
+    const extra = Object.keys(STOPS).length, ol = $('route');
     ol.innerHTML = '';
-    const count = Math.max(LEVELS.length, progress.unlocked);
-    for (let n = 1; n <= count; n++) {
+    $('more').hidden = progress.unlocked <= extra;
+    for (let n = extra + 1; n <= Math.max(extra + 1, progress.unlocked); n++) {
       const d = levelDef(n), st = progress.stars[n] || 0;
       const li = document.createElement('li');
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'route-item' + (n === level ? ' cur' : '');
+      b.className = 'route-item' + (mode === 'route' && n === level ? ' cur' : '');
       b.disabled = n > progress.unlocked;
       b.innerHTML = `<span class="n">${n > progress.unlocked ? LOCK : ''}Уровень ${n}</span><span class="nm">${d.name}</span>
         <span class="st" aria-label="звёзд: ${st}"><i>${'★'.repeat(st)}</i>${'★'.repeat(3 - st)}</span>`;
@@ -1104,7 +1483,12 @@ function levelDef(n) {
     }
     const cur = ol.querySelector('.cur');
     if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
+    const dd = dailyDef(new Date()), best = progress.daily[dd.seed];
+    $('dailyDate').textContent = today();
+    $('dailyBest').textContent = best ? `рекорд сегодня: ${best}` : 'сегодня ещё не пройдено';
+    $('dailyBtn').classList.toggle('cur', mode === 'daily');
   }
+  $('dailyBtn').addEventListener('click', () => { if (!busy) startDaily(); });
 
   // ---------- Effects ----------
   function fx(className, style, html, ms) {
@@ -1127,11 +1511,15 @@ function levelDef(n) {
       fx('gull col', { left: e.c * 12.5 + '%' }, GULL_FLY, 520);
       sfx.gull();
     } else if (e.kind === 'bomb') {
-      fx('burst', { left: (e.c - 1) * 12.5 + '%', top: (e.r - 1) * 12.5 + '%' }, '', 480);
+      const size = e.size || 3, off = (size - 1) / 2;
+      fx('burst', { left: (e.c - off) * 12.5 + '%', top: (e.r - off) * 12.5 + '%', width: size * 12.5 + '%', height: size * 12.5 + '%' }, '', 480);
       sfx.bomb();
     } else if (e.kind === 'nazar') {
       fx('wave', { left: e.c * 12.5 + '%', top: e.r * 12.5 + '%' }, '', 650);
       sfx.nazar();
+    } else if (e.kind === 'deliver') {
+      fx('wave gold', { left: e.c * 12.5 + '%', top: e.r * 12.5 + '%' }, '', 650);
+      sfx.goal();
     }
     haptic(e.kind === 'nazar' ? [20, 40, 30] : 22);
   }
@@ -1140,17 +1528,34 @@ function levelDef(n) {
   // ---------- Playing out a move ----------
   async function playSteps(res) {
     for (const s of res.steps) {
+      if (s.charged) {
+        for (const u of s.charged) {
+          paintTile(u.id, u.type, u.special, u.hp);
+          const el = els.get(u.id);
+          if (el) pulse(el, 'born', 450);
+        }
+        sfx.special();
+        await wait(380);
+      }
       s.effects.forEach(showEffect);
       for (const t of s.cleared) {
         const el = els.get(t.id);
         if (el) el.classList.add('pop');
       }
+      for (const d of s.damaged) {
+        paintTile(d.id, d.type, d.special, d.hp);
+        const el = els.get(d.id);
+        if (el) pulse(el, 'nope', 320);
+      }
       for (const u of s.upgraded) {
-        paintTile(u.id, u.type, u.special);
+        paintTile(u.id, u.type, u.special, u.hp);
         const el = els.get(u.id);
         if (el) pulse(el, 'born', 450);
       }
       if (s.upgraded.length) { sfx.special(); haptic(18); }
+      if (s.damaged.length) sfx.crack();
+      if (s.freed.cat) sfx.meow();
+      if (s.freed.tea) sfx.crack();
       let restored = false;
       for (const d of s.dust) {
         paintCell(d.r, d.c);
@@ -1168,8 +1573,12 @@ function levelDef(n) {
           if (chip) pulse(chip, 'bump', 460);
         }
       }
+      for (const k of Object.keys(s.freed)) {
+        const chip = $('goals').querySelector(`[data-type="${k}"]`);
+        if (chip) pulse(chip, 'bump', 460);
+      }
       score += s.score;
-      sfx.match(s.cascade);
+      if (s.cleared.length) sfx.match(s.cascade);
       if (!s.effects.length) haptic(s.cascade > 1 ? 14 : 9);
       const praise = PRAISE[Math.min(s.cascade, PRAISE.length - 1)];
       if (praise) say(praise[0], praise[1]);
@@ -1197,7 +1606,7 @@ function levelDef(n) {
     if (res.shuffle) {
       say('Перемешиваем');
       for (const t of res.shuffle) {
-        paintTile(t.id, t.type, t.special);
+        paintTile(t.id, t.type, t.special, t.hp);
         const el = els.get(t.id);
         if (el) pulse(el, 'born', 450);
       }
@@ -1212,10 +1621,13 @@ function levelDef(n) {
     busy = true;
     clearHint(); deselect();
     const elA = els.get(A.id), elB = els.get(B.id);
-    setPos(elA, b[0], b[1]);
-    setPos(elB, a[0], a[1]);
-    sfx.swap();
-    await wait(200);
+    const fixed = A.type === -2 || B.type === -2;
+    if (!fixed) {
+      setPos(elA, b[0], b[1]);
+      setPos(elB, a[0], a[1]);
+      sfx.swap();
+      await wait(200);
+    }
     const res = engine.swap(a, b);
     if (!res.valid) {
       setPos(elA, a[0], a[1]);
@@ -1225,68 +1637,118 @@ function levelDef(n) {
       haptic([8, 40, 8]);
       await wait(320);
       busy = false;
+      renderBoosts();
       scheduleHint();
       return;
     }
     haptic(8);
     movesLeft--;
+    moved = true;
     hud();
     await playSteps(res);
     busy = false;
-    checkEnd();
+    await checkEnd();
     if (!over) scheduleHint();
   }
 
-  function checkEnd() {
+  // Leftover moves become seagulls that all take off at once.
+  async function finale() {
+    const n = Math.min(movesLeft, 10);
+    if (!n) return 0;
+    const before = score;
+    say('Салют!', 'чайки за оставшиеся ходы');
+    const res = engine.salute(n);
+    movesLeft -= n;
+    hud();
+    for (const m of res.marks) {
+      paintTile(m.id, m.type, m.special, m.hp);
+      const el = els.get(m.id);
+      if (el) pulse(el, 'born', 450);
+    }
+    sfx.special();
+    await wait(650);
+    await playSteps({ steps: res.steps, shuffle: null });
+    return score - before;
+  }
+
+  async function checkEnd() {
     const done = goalsDone();
     if (!done && movesLeft > 0) return;
     over = true;
     clearHint();
     deselect();
+    hud();
     const stars = $('stars');
     if (done) {
       const st = movesLeft >= Math.ceil(def.moves * 0.25) ? 3 : movesLeft >= Math.ceil(def.moves * 0.1) ? 2 : 1;
-      const bonus = movesLeft * 60;
-      score += bonus;
-      progress.stars[level] = Math.max(progress.stars[level] || 0, st);
-      progress.best[level] = Math.max(progress.best[level] || 0, score);
-      progress.unlocked = Math.max(progress.unlocked, level + 1);
-      store.set('izrazcy-progress', progress);
-      stars.innerHTML = STAR(st >= 1) + STAR(st >= 2) + STAR(st >= 3);
-      stars.hidden = false;
-      $('ovTitle').textContent = level === LEVELS.length ? 'Весь Стамбул пройден!' : 'Уровень пройден';
-      $('ovText').textContent = (movesLeft ? `В запасе ${movesLeft} ${plural(movesLeft, 'ход', 'хода', 'ходов')}, бонус +${bonus}. ` : '') + `Итого ${score} очков.` +
-        (st < 3 ? ` Третья звезда — если в запасе останется ${Math.ceil(def.moves * 0.25)} ${plural(Math.ceil(def.moves * 0.25), 'ход', 'хода', 'ходов')}.` : '');
-      $('ovPrimary').textContent = 'Дальше';
-      $('ovPrimary').onclick = () => startLevel(level + 1);
-      $('ovSecondary').textContent = 'Ещё раз';
-      $('ovSecondary').onclick = () => startLevel(level);
-      $('ovSecondary').hidden = false;
+      const gulls = Math.min(movesLeft, 10);
       sfx.win();
       haptic([25, 60, 25, 60, 45]);
+      busy = true;
+      const bonus = await finale();
+      busy = false;
+      let earned = 0;
+      if (mode === 'daily') {
+        if (!progress.daily[def.seed]) earned = 2;
+        progress.daily[def.seed] = Math.max(progress.daily[def.seed] || 0, score);
+        stars.hidden = true;
+        $('ovTitle').textContent = 'Задание дня выполнено';
+        $('ovPrimary').textContent = 'К маршруту';
+        $('ovPrimary').onclick = () => startLevel(Math.max(1, progress.unlocked));
+        $('ovSecondary').textContent = 'Ещё раз';
+        $('ovSecondary').onclick = () => startDaily();
+      } else {
+        earned = Math.max(0, st - (progress.stars[level] || 0));
+        progress.stars[level] = Math.max(progress.stars[level] || 0, st);
+        progress.best[level] = Math.max(progress.best[level] || 0, score);
+        progress.unlocked = Math.max(progress.unlocked, level + 1);
+        stars.innerHTML = STAR(st >= 1) + STAR(st >= 2) + STAR(st >= 3);
+        stars.hidden = false;
+        $('ovTitle').textContent = level === LEVELS.length ? 'Маршрут пройден!' : 'Уровень пройден';
+        $('ovPrimary').textContent = 'Дальше';
+        $('ovPrimary').onclick = () => startLevel(level + 1);
+        $('ovSecondary').textContent = 'Ещё раз';
+        $('ovSecondary').onclick = () => startLevel(level);
+      }
+      progress.coins += earned;
+      saveProgress();
+      $('ovSecondary').hidden = false;
+      $('ovText').textContent = (gulls ? `Салют из ${gulls} ${plural(gulls, 'чайки', 'чаек', 'чаек')}: +${bonus}. ` : '') + `Итого ${score} очков.` +
+        (earned ? ` Получено ${earned} ₺ на бонусы.` : '') +
+        (mode === 'route' && st < 3 ? ` Третья звезда — если в запасе останется ${Math.ceil(def.moves * 0.25)} ${plural(Math.ceil(def.moves * 0.25), 'ход', 'хода', 'ходов')}.` : '');
     } else {
       const miss = Object.entries(need).filter(([, v]) => v > 0).map(([t, v]) => `${PIECES[t].name} — ${v}`);
+      const o = engine.obstacles();
+      for (const k of ['cat', 'tea', 'cart']) if (o[k]) miss.push(`${OBSTACLE_NAMES[k].toLowerCase()} — ${o[k]}`);
       if (engine.dustLeft() > 0) miss.push(`пыльные клетки — ${engine.dustLeft()}`);
       stars.hidden = true;
       $('ovTitle').textContent = 'Ходы закончились';
       $('ovText').textContent = 'Не хватило: ' + miss.join(', ') + '.';
       $('ovPrimary').textContent = 'Ещё раз';
-      $('ovPrimary').onclick = () => startLevel(level);
-      $('ovSecondary').hidden = true;
+      $('ovPrimary').onclick = () => (mode === 'daily' ? startDaily() : startLevel(level));
+      if (mode === 'daily') {
+        $('ovSecondary').textContent = 'К маршруту';
+        $('ovSecondary').onclick = () => startLevel(Math.max(1, progress.unlocked));
+        $('ovSecondary').hidden = false;
+      } else {
+        $('ovSecondary').hidden = true;
+      }
       sfx.lose();
       haptic(70);
     }
     hud();
     renderRoute();
-    setTimeout(() => { $('overlay').hidden = false; $('ovPrimary').focus({ preventScroll: true }); }, done ? 700 : 350);
+    setTimeout(() => { $('overlay').hidden = false; $('ovPrimary').focus({ preventScroll: true }); }, done ? 400 : 350);
   }
 
   // ---------- Selection, hints, input ----------
   const tileAt = p => engine.grid[p[0]] && engine.grid[p[0]][p[1]];
   function select(p) {
     deselect();
+    const t = tileAt(p);
+    if (!t || t.type === -2) { pulse(els.get(t.id), 'nope', 320); sfx.nope(); return; }
     sel = p;
-    els.get(tileAt(p).id).classList.add('sel');
+    els.get(t.id).classList.add('sel');
     sfx.select();
     haptic(6);
   }
@@ -1364,22 +1826,24 @@ function levelDef(n) {
   });
   boardEl.addEventListener('focus', () => { if (boardEl.matches(':focus-visible')) showCursor(); });
   boardEl.addEventListener('blur', () => tilesEl.querySelectorAll('.kf').forEach(el => el.classList.remove('kf')));
-  $('restart').addEventListener('click', () => { if (!busy) startLevel(level); });
+  $('restart').addEventListener('click', () => { if (!busy) (mode === 'daily' ? startDaily() : startLevel(level)); });
 
   // ---------- Levels ----------
-  function startLevel(n, snap) {
-    level = n;
-    def = levelDef(n);
-    engine = createEngine({ kinds: def.pieces });
-    engine.init(def.dust);
+  function begin(d, m, n, snap) {
+    mode = m; level = n; def = d;
+    engine = createEngine({ kinds: def.pieces, rng: m === 'daily' ? seededRand(def.seed) : undefined });
+    engine.init(def.dust, def.tiles);
     need = { ...def.goals };
     movesLeft = def.moves;
     score = 0;
+    moved = false;
+    boosted = {};
     if (snap) {
       engine.restore(snap.board);
       need = snap.need;
       movesLeft = snap.movesLeft;
       score = snap.score;
+      moved = !!snap.moved;
     }
     over = false; busy = false; sel = null;
     $('overlay').hidden = true;
@@ -1387,18 +1851,20 @@ function levelDef(n) {
     build(!snap);
     hud();
     renderRoute();
-    if (!snap) say(def.name, 'уровень ' + n);
+    if (!snap) say(def.name, m === 'daily' ? today() : 'уровень ' + n);
     scheduleHint();
   }
+  const startLevel = (n, snap) => begin(levelDef(n), 'route', n, snap);
+  const startDaily = snap => begin(dailyDef(new Date()), 'daily', 0, snap);
 
-  window.claude?.hot?.snapshot?.(() => ({ level, movesLeft, need, score, over, board: engine.snapshot() }));
+  window.claude?.hot?.snapshot?.(() => ({ mode, level, movesLeft, need, score, over, moved, board: engine.snapshot() }));
   function start(data) {
-    if (data && data.board && !data.over) startLevel(data.level, data);
+    if (data && data.board && !data.over) data.mode === 'daily' ? startDaily(data) : startLevel(data.level, data);
     else startLevel(Math.max(1, progress.unlocked));
   }
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 
-  if (location.hash === '#test') window.__izr = { attempt, engine: () => engine, startLevel, state: () => ({ level, movesLeft, need, score, over, busy }) };
+  if (location.hash === '#test') window.__izr = { attempt, engine: () => engine, startLevel, startDaily, state: () => ({ mode, level, movesLeft, need, score, over, busy, coins: progress.coins }) };
 })();
 </script>
 </body>
