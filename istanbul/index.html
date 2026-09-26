@@ -70,34 +70,40 @@
 
   /* ---------- Level + HUD ---------- */
   .level {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-    padding: 12px 14px; display: grid; gap: 8px; box-shadow: 0 6px 18px rgba(22,35,63,.06);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px 12px; display: grid; gap: 7px; box-shadow: 0 4px 14px rgba(22,35,63,.06);
   }
-  .level-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--turq); }
-  .level h2 { margin: 2px 0 0; font-size: 22px; line-height: 1.1; color: var(--ink); }
-  .caption { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 46ch; }
+  .level-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .lvl { margin: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; font-weight: 400; }
+  .lvl .serif { font-size: 20px; line-height: 1.1; color: var(--ink); }
+  .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--turq); white-space: nowrap; }
+  .caption {
+    margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; cursor: pointer;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
+  }
+  .caption.open { display: block; }
   .moves {
-    flex: none; min-width: 72px; text-align: center; border-radius: 12px; padding: 4px 10px 6px;
+    flex: none; display: flex; align-items: baseline; gap: 4px; border-radius: 999px; padding: 2px 11px 3px;
     background: #eef3fc; color: var(--cobalt-deep);
   }
-  .moves b { display: block; font-size: 30px; line-height: 1.05; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .moves span { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .moves b { font-size: 22px; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .moves span { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   .moves.low { background: #fdecea; color: var(--coral); }
-  .moves.low b { animation: pulse 1s ease-in-out infinite; }
+  .moves.low b { display: inline-block; animation: pulse 1s ease-in-out infinite; }
   @keyframes pulse { 50% { transform: scale(1.1); } }
 
-  .goals { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .goals { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
   .goal {
-    display: flex; align-items: center; gap: 6px; padding: 3px 12px 3px 3px; border-radius: 999px;
+    display: flex; align-items: center; gap: 4px; padding: 2px 9px 2px 2px; border-radius: 999px; font-size: 14px;
     background: #f6f8fc; border: 1px solid var(--line); font-weight: 800; font-variant-numeric: tabular-nums;
   }
-  .goal svg { width: 30px; height: 30px; display: block; }
-  .goal .gi { width: 30px; height: 30px; }
+  .goal svg { width: 24px; height: 24px; display: block; }
+  .goal .gi { width: 24px; height: 24px; }
   .goal.done { background: #e9f6ee; border-color: #a9dcbc; color: var(--ok); }
   .bump { animation: bump .45s; }
   @keyframes bump { 40% { transform: scale(1.15); } }
-  .scoreline { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .scorebar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .scoreline { flex: 1 1 auto; display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .scoreline b { color: var(--ink); font-weight: 800; }
 
   /* ---------- Board ---------- */
@@ -216,20 +222,21 @@
   .route-item:disabled { cursor: default; background: #f4f6fa; color: #9aa6bd; }
   .route-item:disabled .n { color: #9aa6bd; }
 
-  .boostbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-  .boosts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .boosts { display: flex; gap: 10px; padding-right: 6px; }
   .boost {
-    display: flex; align-items: center; gap: 4px; padding: 3px 8px 3px 3px; border-radius: 999px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--surface); font-weight: 800; font-size: 13px;
+    position: relative; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%;
+    background: none; cursor: pointer; flex: none;
   }
-  .boost svg { width: 26px; height: 26px; display: block; }
-  .boost em { font-style: normal; font-size: 12px; color: var(--turq); }
-  .boost:disabled { opacity: .45; cursor: default; }
-  .boost.used { opacity: 1; background: #e9f6ee; border-color: #a9dcbc; }
+  .boost svg { width: 30px; height: 30px; display: block; }
+  .boost em {
+    position: absolute; right: -7px; bottom: -5px; padding: 0 3px; border-radius: 999px; line-height: 13px;
+    font-style: normal; font-size: 9.5px; font-weight: 800; color: var(--turq); background: var(--surface); border: 1px solid var(--line);
+  }
+  .boost:disabled { opacity: .4; cursor: default; }
+  .boost.used { opacity: 1; box-shadow: 0 0 0 2px var(--ok); }
   .boost:focus-visible, .daily:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   .wallet { display: flex; align-items: center; gap: 5px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .wallet .coin { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: #5a3d00; font-size: 13px; }
-  .boost-hint { margin: 0; flex: 1 1 8em; font-size: 12px; line-height: 1.3; color: var(--muted); }
+  .wallet .coin { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #5a3d00; font-size: 13px; }
 
   .daily {
     display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; width: 100%; text-align: left;
@@ -335,18 +342,14 @@
 
   <section class="level">
     <div class="level-top">
-      <div>
-        <span class="eyebrow" id="lvlNum">Уровень 1</span>
-        <h2 class="serif" id="lvlName">Султанахмет</h2>
-      </div>
+      <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="serif" id="lvlName">Султанахмет</span></h2>
       <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
     </div>
-    <p class="caption" id="lvlCaption"></p>
+    <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
     <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
-    <div class="scoreline"><span>Очки <b id="score">0</b></span><span><span id="bestLabel">Рекорд уровня</span> <b id="best">—</b></span></div>
-    <div class="boostbar">
+    <div class="scorebar">
+      <div class="scoreline"><span>Очки <b id="score">0</b></span><span><span id="bestLabel">Рекорд</span> <b id="best">—</b></span></div>
       <div class="boosts" id="boosts" aria-label="Бонусы"></div>
-      <p class="boost-hint" id="boostHint"></p>
       <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
     </div>
   </section>
@@ -1374,7 +1377,7 @@ function dailyDef(date) {
     $('movesBox').classList.toggle('low', movesLeft <= 5 && !over);
     $('score').textContent = score;
     const best = mode === 'daily' ? progress.daily[def.seed] : progress.best[level];
-    $('bestLabel').textContent = mode === 'daily' ? 'Рекорд дня' : 'Рекорд уровня';
+    $('bestLabel').textContent = mode === 'daily' ? 'Рекорд дня' : 'Рекорд';
     $('best').textContent = best || '—';
     for (const li of $('goals').children) {
       const left = goalLeft(li.dataset.type);
@@ -1404,7 +1407,7 @@ function dailyDef(date) {
         btn.dataset.id = b.id;
         btn.title = `${b.label} — ${b.cost} ₺`;
         btn.setAttribute('aria-label', btn.title);
-        btn.innerHTML = `${b.icon}<em>${b.cost} ₺</em>`;
+        btn.innerHTML = `${b.icon}<em>${b.cost}₺</em>`;
         btn.addEventListener('click', () => useBoost(b));
         box.appendChild(btn);
       }
@@ -1414,7 +1417,7 @@ function dailyDef(date) {
       btn.disabled = moved || over || busy || boosted[b.id] || progress.coins < b.cost;
       btn.classList.toggle('used', !!boosted[b.id]);
     }
-    $('boostHint').textContent = moved || over ? 'Бонусы — только до первого хода' : '+3 хода · чайка · назар — до первого хода';
+    box.title = moved || over ? 'Бонусы можно брать только до первого хода' : 'Бонусы: +3 хода, чайка, назар — до первого хода';
   }
   function useBoost(b) {
     if (moved || over || busy || boosted[b.id] || progress.coins < b.cost) return;
@@ -1489,6 +1492,7 @@ function dailyDef(date) {
     $('dailyBtn').classList.toggle('cur', mode === 'daily');
   }
   $('dailyBtn').addEventListener('click', () => { if (!busy) startDaily(); });
+  $('lvlCaption').addEventListener('click', e => e.currentTarget.classList.toggle('open'));
 
   // ---------- Effects ----------
   function fx(className, style, html, ms) {
