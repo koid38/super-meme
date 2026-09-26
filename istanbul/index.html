@@ -82,9 +82,9 @@
     padding: 10px 12px; display: grid; gap: 7px; box-shadow: 0 4px 14px rgba(22,35,63,.06);
   }
   .level-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .lvl { margin: 0; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .lvl { margin: 0; display: grid; min-width: 0; font-size: 15px; font-weight: 700; line-height: 1.25; }
+  .lvl .eyebrow { font-size: 12px; }
   .lvl-name { color: var(--ink); }
-  .lvl-name::before { content: '·'; margin-right: 6px; color: var(--muted); }
   .eyebrow { font-size: inherit; font-weight: 700; color: var(--turq); white-space: nowrap; }
   .caption {
     margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; cursor: pointer;
@@ -111,23 +111,23 @@
   .goal.done { background: #e9f6ee; border-color: #a9dcbc; color: var(--ok); }
   .bump { animation: bump .45s; }
   @keyframes bump { 40% { transform: scale(1.15); } }
-  .scorebar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .scorebar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .shop { display: flex; align-items: center; gap: 10px; flex: none; }
+  .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: rgba(22,35,63,.4); }
+  .buy-icon svg { width: 64px; height: 64px; display: block; }
+  .buy-note { font-size: 13px; }
   .scoreline { flex: 1 1 auto; display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .scoreline b { color: var(--ink); font-weight: 700; }
 
   /* ---------- Board ---------- */
-  .frame {
-    padding: 8px; border-radius: 20px;
-    background: linear-gradient(160deg, #2c60cc, #1a4299);
-    box-shadow: 0 14px 32px rgba(23,58,138,.22), inset 0 0 0 2px rgba(255,255,255,.16);
-  }
+  .frame { border-radius: 14px; box-shadow: 0 10px 26px rgba(23,58,138,.16); }
   #board {
     position: relative; width: 100%; max-width: 100%; aspect-ratio: 1;
-    border-radius: 12px; overflow: hidden; outline: none; background: #fbfcff;
-    box-shadow: 0 0 0 2px var(--gold);
+    border-radius: 14px; overflow: hidden; outline: none; background: #fbfcff;
+    border: 3px solid var(--gold);
     touch-action: none; user-select: none; -webkit-user-select: none;
   }
-  #board:focus-visible { box-shadow: 0 0 0 2px var(--gold), 0 0 0 5px #fff; }
+  #board:focus-visible { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--cobalt); }
   #cells, #tiles, #fx { position: absolute; inset: 0; }
   #cells { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); }
   .cell { background-color: #fbfcff; background-size: 100% 100%; box-shadow: inset 0 0 0 .5px rgba(35,80,184,.1); }
@@ -369,16 +369,31 @@
   <section class="level">
     <div class="level-top">
       <h2 class="lvl"><span class="eyebrow" id="lvlNum">Уровень 1</span> <span class="lvl-name" id="lvlName">Султанахмет</span></h2>
-      <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
+      <div class="shop">
+        <div class="boosts" id="boosts" aria-label="Бонусы"></div>
+        <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
+      </div>
     </div>
     <p class="caption" id="lvlCaption" title="Нажмите, чтобы прочитать целиком"></p>
     <ul class="goals" id="goals" aria-label="Цели уровня"></ul>
     <div class="scorebar">
       <div class="scoreline"><span>Очки <b id="score">0</b></span><span><span id="bestLabel">Рекорд</span> <b id="best">—</b></span></div>
-      <div class="boosts" id="boosts" aria-label="Бонусы"></div>
-      <div class="wallet" title="Лиры на бонусы"><span class="coin" aria-hidden="true">₺</span><b id="coins">0</b></div>
+      <div class="moves" id="movesBox" aria-live="polite"><b id="moves">20</b><span id="movesWord">ходов</span></div>
     </div>
   </section>
+
+  <div class="modal" id="buyModal" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="buyTitle">
+      <div class="buy-icon" id="buyIcon"></div>
+      <h3 class="serif" id="buyTitle"></h3>
+      <p id="buyText"></p>
+      <p class="buy-note" id="buyNote"></p>
+      <div class="actions">
+        <button class="btn" id="buyOk" type="button"></button>
+        <button class="btn ghost" id="buyCancel" type="button">Отмена</button>
+      </div>
+    </div>
+  </div>
 
   <div class="frame">
     <div id="board" tabindex="0" aria-label="Игровое поле 8 на 8. Стрелки двигают курсор, Enter выбирает изразец.">
@@ -1422,9 +1437,12 @@ function dailyDef(date) {
 
   // ---------- Boosts, paid with lira earned for stars ----------
   const BOOSTS = [
-    { id: 'moves', label: '+3 хода', cost: 2, icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#2350b8"/><text x="20" y="26" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="16" fill="#fff">+3</text></svg>' },
-    { id: 'line', label: 'Чайка', cost: 2, icon: '' },
-    { id: 'nazar', label: 'Назар', cost: 4, icon: '' },
+    { id: 'moves', label: '+3 хода', buy: '3 хода', cost: 2,
+      about: 'К этому уровню добавятся 3 хода. Пригодится, если цели большие или мешают препятствия.', icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#2350b8"/><text x="20" y="26" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="16" fill="#fff">+3</text></svg>' },
+    { id: 'line', label: 'Чайка', buy: 'чайку', cost: 2, icon: '',
+      about: 'Случайная фишка на поле станет чайкой. Собери её в совпадение, и чайка очистит всю строку или столбец.' },
+    { id: 'nazar', label: 'Назар', buy: 'назар', cost: 4, icon: '',
+      about: 'На поле появится назар. Поменяй его с любой фишкой, и с поля уйдут все фишки этого цвета.' },
   ];
   function renderBoosts() {
     $('coins').textContent = progress.coins;
@@ -1440,7 +1458,7 @@ function dailyDef(date) {
         btn.title = `${b.label} — ${b.cost} ₺`;
         btn.setAttribute('aria-label', btn.title);
         btn.innerHTML = `${b.icon}<em>${b.cost}₺</em>`;
-        btn.addEventListener('click', () => useBoost(b));
+        btn.addEventListener('click', () => askBoost(b));
         box.appendChild(btn);
       }
     }
@@ -1451,6 +1469,24 @@ function dailyDef(date) {
     }
     box.title = moved || over ? 'Бонусы можно брать только до первого хода' : 'Бонусы: +3 хода, чайка, назар — до первого хода';
   }
+  let pending = null;
+  function askBoost(b) {
+    if (moved || over || busy || boosted[b.id] || progress.coins < b.cost) return;
+    pending = b;
+    $('buyIcon').innerHTML = b.icon;
+    $('buyTitle').textContent = `Купить ${b.buy}?`;
+    $('buyText').textContent = b.about;
+    $('buyNote').textContent = `Цена ${b.cost} ₺, у вас ${progress.coins} ₺. Бонус берётся до первого хода и действует на этот уровень.`;
+    $('buyOk').textContent = `Купить за ${b.cost} ₺`;
+    $('buyModal').hidden = false;
+    $('buyOk').focus({ preventScroll: true });
+  }
+  function closeBuy() { $('buyModal').hidden = true; pending = null; }
+  $('buyOk').addEventListener('click', () => { const b = pending; closeBuy(); if (b) useBoost(b); });
+  $('buyCancel').addEventListener('click', closeBuy);
+  $('buyModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeBuy(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('buyModal').hidden) closeBuy(); });
+
   function useBoost(b) {
     if (moved || over || busy || boosted[b.id] || progress.coins < b.cost) return;
     progress.coins -= b.cost;
