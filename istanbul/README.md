@@ -20,4 +20,4 @@ curl -fsSL https://raw.githubusercontent.com/koid38/super-meme/HEAD/istanbul/dep
 
 Скрипт кладёт игру в папку сайта как `/istanbul/`, проверяет, что nginx её отдаёт, и перенаправляет туда голый адрес, если у сайта нет своей стартовой страницы. Повторный запуск обновляет игру.
 
-Версия 1.0 — git-метка `istanbul-v1.0`.
+Версия 1.0 — коммит `8dd2516` в ветке `claude/vaiucodeing-capabilities-mjz15p`.
